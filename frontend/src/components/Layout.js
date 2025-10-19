@@ -29,15 +29,28 @@ function Layout({ children, currentUser, onLogout }) {
             <h1 className="text-2xl font-bold gradient-text">lupintr</h1>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 hover:bg-gray-100 rounded-full" data-testid="notifications-btn">
-              <Bell className="w-6 h-6 text-gray-600" />
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 hover:bg-muted rounded-full transition-colors"
+              data-testid="theme-toggle-btn"
+              title={isDark ? 'Aydınlık Moda Geç' : 'Karanlık Moda Geç'}
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5 text-foreground" />
+              ) : (
+                <Moon className="w-5 h-5 text-foreground" />
+              )}
+            </button>
+
+            <button className="relative p-2 hover:bg-muted rounded-full" data-testid="notifications-btn">
+              <Bell className="w-5 h-5 text-foreground" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
             <button
               onClick={onLogout}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-full"
+              className="flex items-center gap-2 px-4 py-2 text-destructive hover:bg-destructive/10 rounded-full"
               data-testid="logout-btn"
             >
               <LogOut className="w-5 h-5" />
