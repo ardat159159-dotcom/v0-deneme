@@ -3,9 +3,10 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
+  // Default to dark mode (like admin panel)
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
-    return saved === 'dark';
+    return saved ? saved === 'dark' : true; // Default dark
   });
 
   useEffect(() => {
