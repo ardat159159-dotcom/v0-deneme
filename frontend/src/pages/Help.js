@@ -78,7 +78,7 @@ function Help({ currentUser, onLogout }) {
             <div className="bg-white p-4 rounded-xl text-center">
               <Mail className="w-8 h-8 text-purple-600 mx-auto mb-2" />
               <h3 className="font-semibold mb-1">E-posta</h3>
-              <p className="text-sm text-gray-600">destek@luointr.com</p>
+              <p className="text-sm text-gray-600">destek@lupintr.com</p>
             </div>
 
             <div className="bg-white p-4 rounded-xl text-center">

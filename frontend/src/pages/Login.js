@@ -42,7 +42,7 @@ function Login({ onLogin }) {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <Sparkles className="w-10 h-10 text-purple-600" />
-            <h1 className="text-3xl font-bold gradient-text">luointr</h1>
+            <h1 className="text-3xl font-bold gradient-text">lupintr</h1>
           </Link>
           <p className="text-gray-600">Hesabınıza giriş yapın</p>
         </div>

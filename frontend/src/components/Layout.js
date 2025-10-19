@@ -24,7 +24,7 @@ function Layout({ children, currentUser, onLogout }) {
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/feed" className="flex items-center gap-2">
             <TrendingUp className="w-8 h-8 text-purple-600" />
-            <h1 className="text-2xl font-bold gradient-text">luointr</h1>
+            <h1 className="text-2xl font-bold gradient-text">lupintr</h1>
           </Link>
 
           <div className="flex items-center gap-4">
