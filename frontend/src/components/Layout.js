@@ -1,4 +1,4 @@
-import { Home, User, MessageSquare, Video, TrendingUp, DollarSign, LogOut, Bell } from 'lucide-react';
+import { Home, User, MessageSquare, Video, TrendingUp, DollarSign, LogOut, Bell, Settings, HelpCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 function Layout({ children, currentUser, onLogout }) {
