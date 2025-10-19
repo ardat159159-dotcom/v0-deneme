@@ -40,6 +40,31 @@ class User(BaseModel):
     followers_count: int = 0
     following_count: int = 0
     total_earnings: float = 0.0
+    # KYC fields
+    tc_id: Optional[str] = None
+    birth_date: Optional[str] = None
+    kyc_verified: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class KYCUpdate(BaseModel):
+    tc_id: str
+    birth_date: str  # YYYY-MM-DD format
+
+# Withdrawal Models
+class WithdrawalRequest(BaseModel):
+    user_id: str
+    amount: float
+    method: str  # "btc", "bank", etc
+    wallet_address: Optional[str] = None
+
+class Withdrawal(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    amount: float
+    method: str
+    wallet_address: Optional[str]
+    status: str = "pending"  # pending, approved, rejected
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
