@@ -34,23 +34,23 @@ function Settings({ currentUser, onLogout }) {
 
   return (
     <Layout currentUser={currentUser} onLogout={onLogout}>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto app-container">
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <SettingsIcon className="w-8 h-8 text-purple-600" />
-            <h1 className="text-3xl font-bold">Ayarlar</h1>
+            <SettingsIcon className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Ayarlar</h1>
           </div>
-          <p className="text-gray-600">Hesap ve uygulama ayarlarınızı yönetin</p>
+          <p className="text-muted-foreground">Hesap ve uygulama ayarlarınızı yönetin</p>
         </div>
 
         {/* Notifications Settings */}
-        <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mb-6">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border mb-6">
           <div className="flex items-center gap-3 mb-6">
             <Bell className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-bold">Bildirimler</h2>
+            <h2 className="text-xl font-bold text-card-foreground">Bildirimler</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               { key: 'likes', label: 'Beğeni bildirimleri' },
               { key: 'comments', label: 'Yorum bildirimleri' },
@@ -58,8 +58,8 @@ function Settings({ currentUser, onLogout }) {
               { key: 'messages', label: 'Mesaj bildirimleri' },
               { key: 'earnings', label: 'Kazanç bildirimleri' },
             ].map((item) => (
-              <div key={item.key} className="flex items-center justify-between p-4 bg-muted rounded-xl">
-                <span className="font-medium">{item.label}</span>
+              <div key={item.key} className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-border">
+                <span className="font-medium text-foreground">{item.label}</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -67,7 +67,7 @@ function Settings({ currentUser, onLogout }) {
                     onChange={() => handleToggle('notifications', item.key)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-muted peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
             ))}
@@ -75,20 +75,20 @@ function Settings({ currentUser, onLogout }) {
         </div>
 
         {/* Privacy Settings */}
-        <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mb-6">
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border mb-6">
           <div className="flex items-center gap-3 mb-6">
             <Shield className="w-6 h-6 text-primary" />
-            <h2 className="text-xl font-bold">Gizlilik</h2>
+            <h2 className="text-xl font-bold text-card-foreground">Gizlilik</h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               { key: 'profileVisible', label: 'Profilim herkese açık olsun' },
               { key: 'showEmail', label: 'E-posta adresimi göster' },
               { key: 'showEarnings', label: 'Kazançlarımı göster' },
             ].map((item) => (
-              <div key={item.key} className="flex items-center justify-between p-4 bg-muted rounded-xl">
-                <span className="font-medium">{item.label}</span>
+              <div key={item.key} className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-border">
+                <span className="font-medium text-foreground">{item.label}</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -96,7 +96,7 @@ function Settings({ currentUser, onLogout }) {
                     onChange={() => handleToggle('privacy', item.key)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                  <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-muted peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-gray-300 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
             ))}
@@ -104,41 +104,41 @@ function Settings({ currentUser, onLogout }) {
         </div>
 
         {/* Language & Theme */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
             <div className="flex items-center gap-3 mb-4">
               <Globe className="w-6 h-6 text-primary" />
-              <h2 className="text-xl font-bold">Dil</h2>
+              <h2 className="text-xl font-bold text-card-foreground">Dil</h2>
             </div>
             <select 
               value={settings.language}
               onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl focus:border-primary focus:outline-none"
+              className="w-full px-4 py-3 bg-background text-foreground border-2 border-border rounded-xl focus:border-primary focus:outline-none"
             >
               <option value="tr">Türkçe</option>
               <option value="en">English</option>
             </select>
           </div>
 
-          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
+          <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
             <div className="flex items-center gap-3 mb-4">
               <Palette className="w-6 h-6 text-primary" />
-              <h2 className="text-xl font-bold">Tema</h2>
+              <h2 className="text-xl font-bold text-card-foreground">Tema</h2>
             </div>
             <button
               onClick={toggleTheme}
-              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl hover:border-primary focus:outline-none flex items-center justify-between group"
+              className="w-full px-4 py-3 bg-background text-foreground border-2 border-border rounded-xl hover:border-primary focus:outline-none flex items-center justify-between group touch-feedback"
             >
               <span className="flex items-center gap-3">
                 {isDark ? (
                   <>
                     <Moon className="w-5 h-5 text-primary" />
-                    <span>Karanlık Mod</span>
+                    <span className="font-medium">Karanlık Mod</span>
                   </>
                 ) : (
                   <>
                     <Sun className="w-5 h-5 text-primary" />
-                    <span>Aydınlık Mod</span>
+                    <span className="font-medium">Aydınlık Mod</span>
                   </>
                 )}
               </span>
@@ -150,13 +150,13 @@ function Settings({ currentUser, onLogout }) {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-red-50 border-2 border-red-200 rounded-3xl p-6 mt-6">
-          <h2 className="text-xl font-bold text-red-700 mb-4">Tehlikeli Bölge</h2>
+        <div className="bg-destructive/10 border-2 border-destructive/50 rounded-2xl p-6">
+          <h2 className="text-xl font-bold text-destructive mb-4">Tehlikeli Bölge</h2>
           <div className="space-y-3">
-            <button className="w-full px-6 py-3 bg-white border-2 border-red-300 text-red-600 rounded-xl font-semibold hover:bg-red-50">
+            <button className="w-full px-6 py-3 bg-card border-2 border-destructive/30 text-destructive rounded-xl font-semibold hover:bg-destructive/10 touch-feedback">
               Hesabımı Dondur
             </button>
-            <button className="w-full px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700">
+            <button className="w-full px-6 py-3 bg-destructive text-destructive-foreground rounded-xl font-semibold hover:bg-destructive/90 touch-feedback">
               Hesabımı Sil
             </button>
           </div>
