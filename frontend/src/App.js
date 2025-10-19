@@ -17,6 +17,7 @@ import About from './pages/About';
 import Terms from './pages/Terms';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import AdminLogin from './pages/AdminLogin';
 import AdminPanel from './pages/AdminPanel';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
