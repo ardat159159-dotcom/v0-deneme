@@ -105,26 +105,47 @@ function Settings({ currentUser, onLogout }) {
 
         {/* Language & Theme */}
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-3xl p-6 shadow-sm">
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
             <div className="flex items-center gap-3 mb-4">
-              <Globe className="w-6 h-6 text-purple-600" />
+              <Globe className="w-6 h-6 text-primary" />
               <h2 className="text-xl font-bold">Dil</h2>
             </div>
-            <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+            <select 
+              value={settings.language}
+              onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl focus:border-primary focus:outline-none"
+            >
               <option value="tr">Türkçe</option>
               <option value="en">English</option>
             </select>
           </div>
 
-          <div className="bg-white rounded-3xl p-6 shadow-sm">
+          <div className="bg-card rounded-3xl p-6 shadow-sm border border-border">
             <div className="flex items-center gap-3 mb-4">
-              <Palette className="w-6 h-6 text-purple-600" />
+              <Palette className="w-6 h-6 text-primary" />
               <h2 className="text-xl font-bold">Tema</h2>
             </div>
-            <select className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
-              <option value="light">Aydınlık</option>
-              <option value="dark">Karanlık</option>
-            </select>
+            <button
+              onClick={toggleTheme}
+              className="w-full px-4 py-3 bg-background border-2 border-border rounded-xl hover:border-primary focus:outline-none flex items-center justify-between group"
+            >
+              <span className="flex items-center gap-3">
+                {isDark ? (
+                  <>
+                    <Moon className="w-5 h-5 text-primary" />
+                    <span>Karanlık Mod</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="w-5 h-5 text-primary" />
+                    <span>Aydınlık Mod</span>
+                  </>
+                )}
+              </span>
+              <span className="text-sm text-muted-foreground group-hover:text-primary">
+                Değiştir →
+              </span>
+            </button>
           </div>
         </div>
 
