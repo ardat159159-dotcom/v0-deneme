@@ -78,6 +78,7 @@ function App() {
         <Route path="/terms" element={<Terms />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
