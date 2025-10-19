@@ -1,0 +1,128 @@
+<analysis>
+The previous AI engineer initiated a complex social media application based on detailed user requirements, starting from a foundational full-stack setup (React, FastAPI, MongoDB). The process involved iterative development, addressing user feedback for features like post sharing, stories, live streaming, an interaction-based earning system, user profiles, messaging, and an admin panel. A significant portion of the work focused on design refinement, transitioning from a generic web app to a mobile-first, Instagram/Twitch-like experience, including persistent dark mode issues and a dedicated admin interface. The engineer actively addressed bug fixes, integrated new features, and refined UI elements based on continuous user input and design references. The current state reflects a partially complete application with many core features implemented, but still undergoing significant design and functionality enhancements.
+</analysis>
+
+<product_requirements>
+The user initially requested to transfer a previously developed web application, stating that credits ran out on another account. Since direct transfer isn't possible, the user opted to describe the previous work. The core requirement is to build a mobile-first social media application, similar to Instagram, TikTok, Twitter, or Twitch, but with a unique design and feel (eşsiz olmalı). Key features include:
+1.  **Content Sharing:** Posting text, photos, and videos, and a stories system.
+2.  **Interaction-based Earnings:** A system to reward users financially based on their interactions (likes, comments, shares).
+3.  **User Profiles:** Profile editing, profile pictures, username changes, follower/following counts, and statistics.
+4.  **Messaging:** Private chat functionality.
+5.  **Live Streaming:** Ability for users to start and view live streams.
+6.  **Discovery Page:** A section for trending content.
+7.  **Notifications System.**
+8.  **Payment/Withdrawal System:** BTC payment integration and a mock withdrawal system with mandatory Turkish ID number (TC Kimlik) and age verification.
+9.  **Security:** Robust security for payments and private conversations.
+10. **Admin Panel:** A dedicated admin login (, ) with a separate dashboard to manage users (kick, ban), view app activities, and possibly grant admin rights to users.
+11. **Design:** A modern, unique, visually appealing, and user-friendly design (initially referencing  then evolving to an Instagram/Kick/Twitch-like mobile app aesthetic), including dark mode support (which has been a persistent issue). The website name needs to be lupintr.com with a suitable logo or stylized name.
+12. **Static Pages:** About Us, Terms of Use, Privacy Policy, Earnings Policy pages.
+13. **Robustness:** Prevent duplicate user registrations (email, username, TC Kimlik).
+The application should be fully functional and launch-ready upon completion, with security systems checked.
+</product_requirements>
+
+<key_technical_concepts>
+- **Full-stack Development:** React (Frontend), FastAPI (Backend), MongoDB (Database).
+- **UI Frameworks:** Tailwind CSS, Shadcn UI (components).
+- **State Management:** React , .
+- **Routing:** React Router DOM.
+- **Authentication:** JWT-based for user login/registration.
+- **Database Operations:** MongoDB CRUD operations via FastAPI.
+- **Environment Variables:** , .
+- **API Communication:** Frontend uses  prefix for backend endpoints.
+- **Theme Management:** React Context API for Dark/Light mode toggle.
+</key_technical_concepts>
+
+<code_architecture>
+
+
+-   ****:
+    -   **Importance:** Main FastAPI application, defines all backend API endpoints, handles user authentication, post/story CRUD, interactions, earnings, messaging, KYC, and admin functionalities. Connects to MongoDB.
+    -   **Changes:**
+        -   Initial setup for user/post management, authentication.
+        -   Addition of endpoints for messages, live streams (mock), earnings calculations.
+        -   Implementation of admin-specific routes for user management.
+        -   KYC and withdrawal endpoints added, including TC ID and age verification logic.
+        -   User uniqueness checks (email, username, TC Kimlik) enforced during registration.
+        -   Follow/unfollow routes and live stream management routes added.
+-   ****:
+    -   **Importance:** Main React component, defines the application's routing structure and wraps the app with .
+    -   **Changes:**
+        -   Configured React Router DOM for various pages (Login, Register, Feed, Profile, Messages, Live, Earnings, About, Terms, Settings, Help, AdminLogin, AdminDashboard, UserProfile).
+        -   Integrated  by wrapping the  with  for global theme management.
+        -   Added conditional routing for admin users to automatically redirect to  upon successful login.
+-   ****:
+    -   **Importance:** Handles user login and redirects based on user roles.
+    -   **Changes:** Modified to redirect admin users () directly to  after successful authentication, while regular users go to .
+-   ****:
+    -   **Importance:** Dedicated login page for administrators.
+    -   **Changes:** Newly created as a separate login interface specifically for admin access.
+-   ****:
+    -   **Importance:** Dedicated dashboard for administrators to manage users and view application analytics.
+    -   **Changes:** Newly created with a distinct layout, including features for user banning, income/expense reports.
+-   ****:
+    -   **Importance:** Provides a consistent layout for most application pages, including navigation (sidebar/header).
+    -   **Changes:**
+        -   Added navigation links for new pages (Settings, Help, Admin Panel).
+        -   Implemented a theme toggle button in the header.
+        -   Adjusted styling for mobile-first design and dark mode.
+-   ****:
+    -   **Importance:** User settings page, including theme preferences.
+    -   **Changes:** Integrated  to allow users to toggle between light and dark modes. Updated colors to be theme-aware.
+-   ****:
+    -   **Importance:** Messaging interface.
+    -   **Changes:** Fixed a bug where messages remained marked as unread after being viewed.
+-   ****:
+    -   **Importance:** Displays user profiles and allows editing.
+    -   **Changes:** Enhanced with advanced profile editing functionalities.
+-   ****:
+    -   **Importance:** Main content feed for posts.
+    -   **Changes:** Rewritten to align with the new mobile-first, dark mode-first design, similar to the admin panel's aesthetic.
+-   ****:
+    -   **Importance:** Displays other users' profiles, enabling interaction like following.
+    -   **Changes:** Newly created to support clicking on other users' profiles.
+-   ****:
+    -   **Importance:** Provides global context for managing the application's theme (dark/light mode).
+    -   **Changes:** Created to encapsulate theme state and toggle logic.
+-   ****:
+    -   **Importance:** Configures Tailwind CSS.
+    -   **Changes:** Ensured  is enabled and added a new color palette for the application's aesthetic.
+-   ****:
+    -   **Importance:** Global CSS styles.
+    -   **Changes:** Updated with dark mode variables, mobile-optimized styles, new fonts, and general app-like styling.
+-   ****:
+    -   **Importance:** Entry HTML file for the React application.
+    -   **Changes:** Considered adding meta tags for dark mode (though  in Tailwind config handles it).
+
+</code_architecture>
+
+<pending_tasks>
+-   **Dark Mode:** Apply consistent dark mode across *all* pages, ensuring text visibility.
+-   **Live Streaming:** Enable actual viewing for live streams (currently UI-only mock).
+-   **User Interaction:** Enable clicking on user profiles and implementing a follow/unfollow system.
+-   **Story System:** Implement the ability to post stories (currently functions as regular posts).
+-   **Likes Functionality:** Ensure robust and visible like counts, and potentially add animations.
+-   **Withdrawal UI:** Implement the frontend UI for TC Kimlik and age verification for withdrawals.
+-   **Admin Panel Improvements:** Add a back button, dynamic filtering for search, pagination for earnings history, toast notifications for actions like banning users.
+-   **Overall Design:** Continue refining the UI to achieve a consistent phone-like application feel, specifically like Kick/Twitch, including theme colors.
+-   **Comment Counts:** Ensure comment counts are visible for posts.
+</pending_tasks>
+
+<current_work>
+Immediately prior to this summary request, the AI engineer was focused on a significant list of fixes and improvements requested by the user. The user expressed dissatisfaction with the dark mode implementation (it was inconsistent, and text disappeared) and the overall design (still looking like a web store rather than a mobile app like Kick/Twitch). The user also highlighted issues with live stream viewing, inability to click user profiles, lack of a follow system, and story posting behaving like regular posts.
+
+The AI engineer acknowledged these issues and outlined an action plan:
+1.  Add a back button to the Admin panel.
+2.  Apply dark mode consistently to *all* pages.
+3.  Fix live stream viewing.
+4.  Enable clicking on user profiles.
+5.  Fix the likes functionality.
+6.  Implement the UI for TC Kimlik + age verification.
+7.  Address the prevent duplicate registration (noted as already done).
+8.  Change theme colors.
+
+The engineer had just started implementing these by first adding backend support for following and live stream closing (Message 284), and then creating a new  page (Message 286) to facilitate clicking on other user profiles. The latest messages (287-288) indicate the engineer is focusing on improving the Admin panel's usability with feedback on user IDs, ban actions, search, and pagination, before continuing with the other features like profile clicking and story/live stream functionality.
+</current_work>
+
+<optional_next_step>
+The next step is to implement the Admin panel UI improvements, specifically user ID display, ban toasts, dynamic search, and earnings history pagination.
+</optional_next_step>
