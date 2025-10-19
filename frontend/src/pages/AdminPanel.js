@@ -115,6 +115,14 @@ function AdminPanel() {
             </div>
 
             <div className="flex items-center gap-4">
+              <a
+                href="/"
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-gray-300 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden md:inline">Ana Siteye Dön</span>
+              </a>
+
               <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800 rounded-lg">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center">
                   <span className="text-white font-bold">{adminUser?.username[0].toUpperCase()}</span>
