@@ -541,6 +541,96 @@ async def get_earnings(user_id: str):
         "earnings": earnings
     }
 
+# ==================== KYC ROUTES ====================
+
+@api_router.put("/users/{user_id}/kyc")
+async def update_kyc(user_id: str, kyc: KYCUpdate):
+    """Update user KYC information"""
+    # Validate TC ID (11 digits)
+    if len(kyc.tc_id) != 11 or not kyc.tc_id.isdigit():
+        raise HTTPException(status_code=400, detail="TC Kimlik numarası 11 haneli olmalıdır")
+    
+    # Validate birth date and check age (18+)
+    try:
+        birth_date = datetime.fromisoformat(kyc.birth_date)
+        today = datetime.now()
+        age = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+        
+        if age < 18:
+            raise HTTPException(status_code=400, detail="Para çekme için 18 yaşından büyük olmalısınız")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Geçersiz doğum tarihi formatı")
+    
+    # Check if TC ID already exists for another user
+    existing = await db.users.find_one({"tc_id": kyc.tc_id, "id": {"$ne": user_id}}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Bu TC Kimlik numarası başka bir hesapta kullanılıyor")
+    
+    # Update user
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {
+            "tc_id": kyc.tc_id,
+            "birth_date": kyc.birth_date,
+            "kyc_verified": True
+        }}
+    )
+    
+    return {"message": "KYC bilgileri güncellendi", "kyc_verified": True}
+
+# ==================== WITHDRAWAL ROUTES ====================
+
+@api_router.post("/withdrawals")
+async def create_withdrawal(withdrawal: WithdrawalRequest):
+    """Create withdrawal request"""
+    # Get user
+    user = await db.users.find_one({"id": withdrawal.user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
+    # Check KYC
+    if not user.get('kyc_verified', False):
+        raise HTTPException(status_code=400, detail="Para çekebilmek için kimlik doğrulaması yapmalısınız")
+    
+    # Check minimum amount
+    if withdrawal.amount < 10:
+        raise HTTPException(status_code=400, detail="Minimum çekim tutarı $10.00")
+    
+    # Check balance
+    if user.get('total_earnings', 0) < withdrawal.amount:
+        raise HTTPException(status_code=400, detail="Yetersiz bakiye")
+    
+    # Create withdrawal
+    new_withdrawal = Withdrawal(
+        user_id=withdrawal.user_id,
+        amount=withdrawal.amount,
+        method=withdrawal.method,
+        wallet_address=withdrawal.wallet_address
+    )
+    
+    doc = new_withdrawal.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.withdrawals.insert_one(doc)
+    
+    # Deduct from user balance (in real app, only after approval)
+    await db.users.update_one(
+        {"id": withdrawal.user_id},
+        {"$set": {"total_earnings": user.get('total_earnings', 0) - withdrawal.amount}}
+    )
+    
+    return {"message": "Para çekme talebiniz alındı", "withdrawal": new_withdrawal}
+
+@api_router.get("/withdrawals/{user_id}")
+async def get_withdrawals(user_id: str):
+    """Get user withdrawal history"""
+    withdrawals = await db.withdrawals.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    for w in withdrawals:
+        if isinstance(w['created_at'], str):
+            w['created_at'] = datetime.fromisoformat(w['created_at'])
+    
+    return withdrawals
+
 # ==================== NOTIFICATION ROUTES ====================
 
 @api_router.get("/notifications/{user_id}")
