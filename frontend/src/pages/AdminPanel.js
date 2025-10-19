@@ -60,10 +60,12 @@ function AdminPanel() {
     try {
       await axios.delete(`${API}/admin/users/${userId}`);
       setUsers(users.filter(u => u.id !== userId));
-      alert('Kullanıcı banlandı!');
+      
+      // Toast notification instead of alert
+      showToast('Kullanıcı başarıyla banlandı!', 'success');
     } catch (error) {
       console.error('Error banning user:', error);
-      alert('Hata oluştu!');
+      showToast('Hata oluştu!', 'error');
     }
   };
 
@@ -73,11 +75,25 @@ function AdminPanel() {
     try {
       await axios.delete(`${API}/admin/posts/${postId}`);
       setPosts(posts.filter(p => p.id !== postId));
-      alert('Gönderi silindi!');
+      showToast('Gönderi başarıyla silindi!', 'success');
     } catch (error) {
       console.error('Error deleting post:', error);
-      alert('Hata oluştu!');
+      showToast('Hata oluştu!', 'error');
     }
+  };
+
+  const showToast = (message, type = 'success') => {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 animate-fade-in ${
+      type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('animate-fade-out');
+      setTimeout(() => document.body.removeChild(toast), 300);
+    }, 2000);
   };
 
   const handleLogout = () => {
