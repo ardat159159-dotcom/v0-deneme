@@ -4,6 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 function Layout({ children, currentUser, onLogout }) {
   const location = useLocation();
+  const { isDark, toggleTheme } = useTheme();
 
   const navItems = [
     { icon: Home, label: 'Ana Sayfa', path: '/feed' },
