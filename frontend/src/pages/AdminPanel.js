@@ -370,8 +370,6 @@ function AdminPanel() {
 }
 
 export default AdminPanel;
-
-        {/* Dashboard Tab */}
         {activeTab === 'dashboard' && stats && (
           <div className="grid md:grid-cols-4 gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm">
