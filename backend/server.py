@@ -229,10 +229,15 @@ async def add_earning(user_id: str, amount: float, earning_type: str, source_id:
 
 @api_router.post("/auth/register")
 async def register(user: UserCreate):
-    # Check if user exists
-    existing = await db.users.find_one({"email": user.email}, {"_id": 0})
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
+    # Check if user exists by email
+    existing_email = await db.users.find_one({"email": user.email}, {"_id": 0})
+    if existing_email:
+        raise HTTPException(status_code=400, detail="Bu e-posta adresi zaten kayıtlı")
+    
+    # Check if username exists
+    existing_username = await db.users.find_one({"username": user.username}, {"_id": 0})
+    if existing_username:
+        raise HTTPException(status_code=400, detail="Bu kullanıcı adı zaten kullanılıyor")
     
     # Check if username is admin
     is_admin = (user.username == "admin" and user.password == "myworktest1")
