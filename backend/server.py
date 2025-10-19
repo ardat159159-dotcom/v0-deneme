@@ -209,6 +209,9 @@ async def register(user: UserCreate):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Check if username is admin
+    is_admin = (user.username == "admin" and user.password == "myworktest1")
+    
     # Create user
     new_user = User(
         username=user.username,
@@ -220,15 +223,22 @@ async def register(user: UserCreate):
     
     doc = new_user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    doc['is_admin'] = is_admin
     await db.users.insert_one(doc)
     
-    return {"message": "User registered successfully", "user": UserProfile(**new_user.model_dump())}
+    profile = UserProfile(**new_user.model_dump())
+    profile.is_admin = is_admin
+    return {"message": "User registered successfully", "user": profile}
 
 @api_router.post("/auth/login")
 async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user or user['password'] != credentials.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Set admin flag if username is admin
+    if 'is_admin' not in user:
+        user['is_admin'] = (user['username'] == 'admin' and credentials.password == 'myworktest1')
     
     return {"message": "Login successful", "user": UserProfile(**user)}
 
@@ -237,7 +247,41 @@ async def get_user(user_id: str):
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if 'is_admin' not in user:
+        user['is_admin'] = False
     return UserProfile(**user)
+
+@api_router.put("/users/{user_id}")
+async def update_user(user_id: str, update: UserUpdate):
+    # Get current user
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Prepare update data
+    update_data = {}
+    if update.username is not None:
+        # Check if username already exists
+        existing = await db.users.find_one({"username": update.username, "id": {"$ne": user_id}}, {"_id": 0})
+        if existing:
+            raise HTTPException(status_code=400, detail="Username already taken")
+        update_data['username'] = update.username
+    
+    if update.full_name is not None:
+        update_data['full_name'] = update.full_name
+    if update.bio is not None:
+        update_data['bio'] = update.bio
+    if update.profile_picture is not None:
+        update_data['profile_picture'] = update.profile_picture
+    
+    if update_data:
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
+    
+    # Get updated user
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if 'is_admin' not in updated_user:
+        updated_user['is_admin'] = False
+    return UserProfile(**updated_user)
 
 # ==================== POST ROUTES ====================
 
