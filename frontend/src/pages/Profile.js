@@ -41,8 +41,20 @@ function Profile({ currentUser, onLogout, updateUser }) {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    // In a real app, this would call an update API
-    setShowEditModal(false);
+    
+    try {
+      const response = await axios.put(`${API}/users/${currentUser.id}`, editForm);
+      setUser(response.data);
+      if (updateUser) {
+        updateUser(response.data);
+      }
+      setShowEditModal(false);
+      alert('Profil güncellendi!');
+      loadUserData();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert(error.response?.data?.detail || 'Profil güncellenirken hata oluştu!');
+    }
   };
 
   if (loading) {
