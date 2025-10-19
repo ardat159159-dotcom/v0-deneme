@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Lock, Globe, Palette, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Lock, Globe, Palette, Shield, Moon, Sun } from 'lucide-react';
 import Layout from '../components/Layout';
+import { useState } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 function Settings({ currentUser, onLogout }) {
   const [settings, setSettings] = useState({
