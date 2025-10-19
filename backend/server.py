@@ -62,6 +62,13 @@ class UserProfile(BaseModel):
     followers_count: int
     following_count: int
     total_earnings: float
+    is_admin: bool = False
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    bio: Optional[str] = None
+    profile_picture: Optional[str] = None
 
 # Post Models
 class Post(BaseModel):
