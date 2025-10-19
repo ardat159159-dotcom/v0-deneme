@@ -59,7 +59,8 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
       <Routes>
         <Route path="/" element={!currentUser ? <Landing /> : <Navigate to="/feed" />} />
         <Route path="/login" element={!currentUser ? <Login onLogin={handleLogin} /> : <Navigate to="/feed" />} />
