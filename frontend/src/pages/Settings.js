@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 function Settings({ currentUser, onLogout }) {
+  const { isDark, toggleTheme } = useTheme();
+  
   const [settings, setSettings] = useState({
     notifications: {
       likes: true,
@@ -17,8 +19,7 @@ function Settings({ currentUser, onLogout }) {
       showEmail: false,
       showEarnings: true
     },
-    language: 'tr',
-    theme: 'light'
+    language: 'tr'
   });
 
   const handleToggle = (category, key) => {
