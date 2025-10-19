@@ -6,14 +6,16 @@ import Layout from '../components/Layout';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function Profile({ currentUser, onLogout }) {
+function Profile({ currentUser, onLogout, updateUser }) {
   const [user, setUser] = useState(currentUser);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
+    username: currentUser.username,
     full_name: currentUser.full_name,
-    bio: currentUser.bio || ''
+    bio: currentUser.bio || '',
+    profile_picture: currentUser.profile_picture
   });
 
   useEffect(() => {
