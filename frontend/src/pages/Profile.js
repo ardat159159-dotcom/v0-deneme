@@ -158,10 +158,23 @@ function Profile({ currentUser, onLogout, updateUser }) {
       {/* Edit Profile Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">Profili Düzenle</h2>
             <form onSubmit={handleEdit}>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Kullanıcı Adı
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.username}
+                    onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                    placeholder="kullanici_adi"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Ad Soyad
@@ -176,6 +189,22 @@ function Profile({ currentUser, onLogout, updateUser }) {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Profil Fotoğrafı URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editForm.profile_picture}
+                    onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                    placeholder="https://example.com/photo.jpg"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Veya otomatik avatar kullan: https://api.dicebear.com/7.x/avataaars/svg?seed={editForm.username}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Biografi
                   </label>
                   <textarea
@@ -185,6 +214,26 @@ function Profile({ currentUser, onLogout, updateUser }) {
                     rows="3"
                     placeholder="Kendinizden bahsedin..."
                   />
+                </div>
+
+                {/* Preview */}
+                <div className="p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Önizleme:</p>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={editForm.profile_picture}
+                      alt="Preview"
+                      className="w-16 h-16 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${editForm.username}`;
+                      }}
+                    />
+                    <div>
+                      <p className="font-bold">@{editForm.username}</p>
+                      <p className="text-sm text-gray-600">{editForm.full_name}</p>
+                      <p className="text-sm text-gray-500">{editForm.bio || 'Bio yok'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
