@@ -44,9 +44,9 @@ function Settings({ currentUser, onLogout }) {
         </div>
 
         {/* Notifications Settings */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm mb-6">
+        <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mb-6">
           <div className="flex items-center gap-3 mb-6">
-            <Bell className="w-6 h-6 text-purple-600" />
+            <Bell className="w-6 h-6 text-primary" />
             <h2 className="text-xl font-bold">Bildirimler</h2>
           </div>
 
@@ -58,7 +58,7 @@ function Settings({ currentUser, onLogout }) {
               { key: 'messages', label: 'Mesaj bildirimleri' },
               { key: 'earnings', label: 'Kazanç bildirimleri' },
             ].map((item) => (
-              <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div key={item.key} className="flex items-center justify-between p-4 bg-muted rounded-xl">
                 <span className="font-medium">{item.label}</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -67,7 +67,7 @@ function Settings({ currentUser, onLogout }) {
                     onChange={() => handleToggle('notifications', item.key)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600"></div>
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
             ))}
@@ -75,9 +75,9 @@ function Settings({ currentUser, onLogout }) {
         </div>
 
         {/* Privacy Settings */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm mb-6">
+        <div className="bg-card rounded-3xl p-6 shadow-sm border border-border mb-6">
           <div className="flex items-center gap-3 mb-6">
-            <Shield className="w-6 h-6 text-purple-600" />
+            <Shield className="w-6 h-6 text-primary" />
             <h2 className="text-xl font-bold">Gizlilik</h2>
           </div>
 
@@ -87,7 +87,7 @@ function Settings({ currentUser, onLogout }) {
               { key: 'showEmail', label: 'E-posta adresimi göster' },
               { key: 'showEarnings', label: 'Kazançlarımı göster' },
             ].map((item) => (
-              <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div key={item.key} className="flex items-center justify-between p-4 bg-muted rounded-xl">
                 <span className="font-medium">{item.label}</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -96,7 +96,7 @@ function Settings({ currentUser, onLogout }) {
                     onChange={() => handleToggle('privacy', item.key)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-purple-600 peer-checked:to-pink-600"></div>
+                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                 </label>
               </div>
             ))}
