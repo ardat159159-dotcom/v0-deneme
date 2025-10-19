@@ -631,7 +631,81 @@ async def get_withdrawals(user_id: str):
     
     return withdrawals
 
-# ==================== NOTIFICATION ROUTES ====================
+# ==================== FOLLOW SYSTEM ====================
+
+@api_router.post("/users/{user_id}/follow")
+async def follow_user(user_id: str, follower_id: str):
+    """Follow a user"""
+    # Check if already following
+    existing = await db.follows.find_one({
+        "user_id": user_id,
+        "follower_id": follower_id
+    }, {"_id": 0})
+    
+    if existing:
+        # Unfollow
+        await db.follows.delete_one({
+            "user_id": user_id,
+            "follower_id": follower_id
+        })
+        
+        # Update counts
+        await db.users.update_one({"id": user_id}, {"$inc": {"followers_count": -1}})
+        await db.users.update_one({"id": follower_id}, {"$inc": {"following_count": -1}})
+        
+        return {"message": "Unfollowed", "is_following": False}
+    else:
+        # Follow
+        await db.follows.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "follower_id": follower_id,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # Update counts
+        await db.users.update_one({"id": user_id}, {"$inc": {"followers_count": 1}})
+        await db.users.update_one({"id": follower_id}, {"$inc": {"following_count": 1}})
+        
+        return {"message": "Followed", "is_following": True}
+
+@api_router.get("/users/{user_id}/is-following")
+async def is_following(user_id: str, follower_id: str):
+    """Check if user is following another user"""
+    follow = await db.follows.find_one({
+        "user_id": user_id,
+        "follower_id": follower_id
+    }, {"_id": 0})
+    
+    return {"is_following": follow is not None}
+
+# ==================== LIVE STREAM CONTROL ====================
+
+@api_router.put("/streams/{stream_id}/end")
+async def end_stream(stream_id: str):
+    """End a live stream"""
+    stream = await db.streams.find_one({"id": stream_id}, {"_id": 0})
+    if not stream:
+        raise HTTPException(status_code=404, detail="Stream not found")
+    
+    await db.streams.update_one(
+        {"id": stream_id},
+        {"$set": {"is_live": False}}
+    )
+    
+    return {"message": "Stream ended"}
+
+@api_router.get("/streams/{stream_id}")
+async def get_stream(stream_id: str):
+    """Get stream details"""
+    stream = await db.streams.find_one({"id": stream_id}, {"_id": 0})
+    if not stream:
+        raise HTTPException(status_code=404, detail="Stream not found")
+    
+    if isinstance(stream['created_at'], str):
+        stream['created_at'] = datetime.fromisoformat(stream['created_at'])
+    
+    return stream
 
 @api_router.get("/notifications/{user_id}")
 async def get_notifications(user_id: str):
