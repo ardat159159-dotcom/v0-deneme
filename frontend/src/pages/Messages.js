@@ -77,9 +77,20 @@ function Messages({ currentUser, onLogout }) {
     }
   };
 
+  const markAsRead = (userId) => {
+    // Mark conversation as read
+    setConversations(prevConversations => 
+      prevConversations.map(conv => 
+        conv.id === userId ? { ...conv, unread: 0 } : conv
+      )
+    );
+  };
+
   const handleSelectUser = (user) => {
     setSelectedUser(user);
     loadMessages(user.id);
+    // Mark as read when user opens conversation
+    markAsRead(user.id);
   };
 
   const handleSendMessage = async (e) => {
@@ -146,7 +157,7 @@ function Messages({ currentUser, onLogout }) {
                         className="w-12 h-12 rounded-full object-cover"
                       />
                       {user.unread > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" data-testid="unread-badge">
                           {user.unread}
                         </span>
                       )}
@@ -217,7 +228,7 @@ function Messages({ currentUser, onLogout }) {
                     />
                     <button
                       type="submit"
-                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg"
+                      className="px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg"
                       data-testid="send-message-btn"
                     >
                       <Send className="w-5 h-5" />
