@@ -1,53 +1,69 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+import './App.css';
+
+// Pages
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Feed from './pages/Feed';
+import Profile from './pages/Profile';
+import Messages from './pages/Messages';
+import Live from './pages/Live';
+import Earnings from './pages/Earnings';
+import About from './pages/About';
+import Terms from './pages/Terms';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    helloWorldApi();
+    // Check if user is logged in
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
   }, []);
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  };
 
-function App() {
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('currentUser');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={!currentUser ? <Landing /> : <Navigate to="/feed" />} />
+        <Route path="/login" element={!currentUser ? <Login onLogin={handleLogin} /> : <Navigate to="/feed" />} />
+        <Route path="/register" element={!currentUser ? <Register onLogin={handleLogin} /> : <Navigate to="/feed" />} />
+        <Route path="/feed" element={currentUser ? <Feed currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/profile" element={currentUser ? <Profile currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/messages" element={currentUser ? <Messages currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/live" element={currentUser ? <Live currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/earnings" element={currentUser ? <Earnings currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/terms" element={<Terms />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
