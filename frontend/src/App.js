@@ -72,7 +72,8 @@ function App() {
         <Route path="/earnings" element={currentUser ? <Earnings currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/settings" element={currentUser ? <Settings currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/help" element={currentUser ? <Help currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
-        <Route path="/admin" element={currentUser?.is_admin ? <AdminPanel currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        {/* Admin route - secret */}
+        <Route path="/admin/dashboard" element={currentUser?.is_admin ? <AdminPanel currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/about" element={<About />} />
         <Route path="/terms" element={<Terms />} />
       </Routes>
