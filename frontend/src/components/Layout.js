@@ -1,5 +1,6 @@
-import { Home, User, MessageSquare, Video, TrendingUp, DollarSign, LogOut, Bell, Settings, HelpCircle, Shield } from 'lucide-react';
+import { Home, User, MessageSquare, Video, TrendingUp, DollarSign, LogOut, Bell, Settings, HelpCircle, Shield, Moon, Sun } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 
 function Layout({ children, currentUser, onLogout }) {
   const location = useLocation();
