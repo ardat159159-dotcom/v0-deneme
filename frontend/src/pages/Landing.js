@@ -8,7 +8,7 @@ function Landing() {
       <header className="p-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <Sparkles className="w-8 h-8 text-purple-600" />
-          <h1 className="text-2xl font-bold gradient-text">SocialEarn</h1>
+          <h1 className="text-2xl font-bold gradient-text">luointr</h1>
         </div>
         <div className="flex gap-3">
           <Link 
@@ -102,7 +102,7 @@ function Landing() {
       {/* Footer */}
       <footer className="mt-20 py-10 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <p className="text-gray-600">© 2025 SocialEarn. Tüm hakları saklıdır.</p>
+          <p className="text-gray-600">© 2025 luointr. Tüm hakları saklıdır.</p>
           <div className="flex gap-6">
             <Link to="/about" className="text-gray-600 hover:text-purple-600">Hakkımızda</Link>
             <Link to="/terms" className="text-gray-600 hover:text-purple-600">Kullanım Şartları</Link>

@@ -8,7 +8,7 @@ function About() {
       <header className="p-6 flex justify-between items-center max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2">
           <Sparkles className="w-8 h-8 text-purple-600" />
-          <h1 className="text-2xl font-bold gradient-text">SocialEarn</h1>
+          <h1 className="text-2xl font-bold gradient-text">luointr</h1>
         </Link>
         <Link 
           to="/" 
@@ -25,7 +25,7 @@ function About() {
 
           <div className="space-y-6 text-gray-700 leading-relaxed">
             <p className="text-lg">
-              <strong>SocialEarn</strong>, içerik üreticilerinin çabalarının karşılığını aldığı yeni nesil sosyal medya platformudur.
+              <strong>luointr</strong>, içerik üreticilerinin çabalarının karşılığını aldığı yeni nesil sosyal medya platformudur.
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4">Vizyonumuz</h2>
@@ -60,7 +60,7 @@ function About() {
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">Neden SocialEarn?</h2>
+            <h2 className="text-2xl font-bold mt-8 mb-4">Neden luointr?</h2>
             <ul className="list-disc list-inside space-y-2">
               <li>Gerçek gelir fırsatları</li>
               <li>Şeffaf kazanç sistemi</li>
@@ -78,7 +78,7 @@ function About() {
             <div className="mt-12 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl">
               <h3 className="text-2xl font-bold mb-4">Bize Katılın!</h3>
               <p className="mb-4">
-                SocialEarn ailesinin bir parçası olun ve içeriklerinizden para kazanmaya başlayın.
+                luointr ailesinin bir parçası olun ve içeriklerinizden para kazanmaya başlayın.
               </p>
               <Link
                 to="/register"
@@ -94,7 +94,7 @@ function About() {
       {/* Footer */}
       <footer className="mt-12 py-10 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-600">© 2025 SocialEarn. Tüm hakları saklıdır.</p>
+          <p className="text-gray-600">© 2025 luointr. Tüm hakları saklıdır.</p>
           <div className="flex gap-6">
             <Link to="/about" className="text-gray-600 hover:text-purple-600">Hakkımızda</Link>
             <Link to="/terms" className="text-gray-600 hover:text-purple-600">Kullanım Şartları</Link>
