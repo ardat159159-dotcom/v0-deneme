@@ -14,6 +14,9 @@ import Live from './pages/Live';
 import Earnings from './pages/Earnings';
 import About from './pages/About';
 import Terms from './pages/Terms';
+import Settings from './pages/Settings';
+import Help from './pages/Help';
+import AdminPanel from './pages/AdminPanel';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -41,6 +44,11 @@ function App() {
     localStorage.removeItem('currentUser');
   };
 
+  const updateCurrentUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
@@ -56,10 +64,13 @@ function App() {
         <Route path="/login" element={!currentUser ? <Login onLogin={handleLogin} /> : <Navigate to="/feed" />} />
         <Route path="/register" element={!currentUser ? <Register onLogin={handleLogin} /> : <Navigate to="/feed" />} />
         <Route path="/feed" element={currentUser ? <Feed currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
-        <Route path="/profile" element={currentUser ? <Profile currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/profile" element={currentUser ? <Profile currentUser={currentUser} onLogout={handleLogout} updateUser={updateCurrentUser} /> : <Navigate to="/" />} />
         <Route path="/messages" element={currentUser ? <Messages currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/live" element={currentUser ? <Live currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/earnings" element={currentUser ? <Earnings currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/settings" element={currentUser ? <Settings currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/help" element={currentUser ? <Help currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
+        <Route path="/admin" element={currentUser?.is_admin ? <AdminPanel currentUser={currentUser} onLogout={handleLogout} /> : <Navigate to="/" />} />
         <Route path="/about" element={<About />} />
         <Route path="/terms" element={<Terms />} />
       </Routes>
