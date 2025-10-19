@@ -523,6 +523,67 @@ async def get_notifications(user_id: str):
     
     return notifications
 
+# ==================== ADMIN ROUTES ====================
+
+@api_router.get("/admin/stats")
+async def get_admin_stats():
+    """Get platform statistics for admin dashboard"""
+    total_users = await db.users.count_documents({})
+    total_posts = await db.posts.count_documents({})
+    total_streams = await db.streams.count_documents({})
+    total_earnings_cursor = await db.earnings.find({}, {"_id": 0, "amount": 1}).to_list(100000)
+    total_earnings = sum(e['amount'] for e in total_earnings_cursor)
+    
+    return {
+        "total_users": total_users,
+        "total_posts": total_posts,
+        "total_streams": total_streams,
+        "total_earnings_paid": total_earnings
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users():
+    """Get all users for admin panel"""
+    users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
+    return users
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str):
+    """Delete a user (admin only)"""
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's posts, comments, etc.
+    await db.posts.delete_many({"user_id": user_id})
+    await db.comments.delete_many({"user_id": user_id})
+    await db.stories.delete_many({"user_id": user_id})
+    
+    return {"message": "User deleted successfully"}
+
+@api_router.delete("/admin/posts/{post_id}")
+async def delete_post(post_id: str):
+    """Delete a post (admin only)"""
+    result = await db.posts.delete_one({"id": post_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Also delete post's comments
+    await db.comments.delete_many({"post_id": post_id})
+    
+    return {"message": "Post deleted successfully"}
+
+@api_router.get("/admin/earnings")
+async def get_all_earnings():
+    """Get all earnings for admin panel"""
+    earnings = await db.earnings.find({}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+    
+    for earning in earnings:
+        if isinstance(earning['created_at'], str):
+            earning['created_at'] = datetime.fromisoformat(earning['created_at'])
+    
+    return earnings
+
 # ==================== SEED DATA ROUTE ====================
 
 @api_router.post("/seed-data")
