@@ -14,7 +14,7 @@ function Layout({ children, currentUser, onLogout }) {
 
   // Admin panel item
   if (currentUser?.is_admin) {
-    navItems.push({ icon: TrendingUp, label: 'Admin', path: '/admin' });
+    navItems.push({ icon: Shield, label: 'Admin Panel', path: '/admin/dashboard' });
   }
 
   return (
