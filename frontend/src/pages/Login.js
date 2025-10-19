@@ -26,7 +26,12 @@ function Login({ onLogin }) {
 
       if (response.data.user) {
         onLogin(response.data.user);
-        navigate('/feed');
+        // Special redirect for admin
+        if (response.data.user.is_admin) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/feed');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Giriş başarısız. Lütfen tekrar deneyin.');
