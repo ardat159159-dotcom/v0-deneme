@@ -26,10 +26,13 @@ function Login({ onLogin }) {
 
       if (response.data.user) {
         onLogin(response.data.user);
-        // Special redirect for admin
+        
+        // Check if user is admin - redirect to admin panel
         if (response.data.user.is_admin) {
+          localStorage.setItem('adminUser', JSON.stringify(response.data.user));
           navigate('/admin/dashboard');
         } else {
+          // Regular user - go to feed
           navigate('/feed');
         }
       }
