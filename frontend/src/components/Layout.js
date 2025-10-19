@@ -73,7 +73,7 @@ function Layout({ children, currentUser, onLogout }) {
 
           {/* User Card */}
           <div className="mt-8 p-4 bg-white rounded-2xl shadow-sm">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <img
                 src={currentUser.profile_picture}
                 alt={currentUser.username}
@@ -83,6 +83,24 @@ function Layout({ children, currentUser, onLogout }) {
                 <p className="font-semibold truncate">{currentUser.username}</p>
                 <p className="text-sm text-gray-500 truncate">{currentUser.email}</p>
               </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-2 pt-4 border-t border-gray-200">
+              <Link
+                to="/settings"
+                className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="text-sm">Ayarlar</span>
+              </Link>
+              <Link
+                to="/help"
+                className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                <HelpCircle className="w-4 h-4" />
+                <span className="text-sm">Yardım</span>
+              </Link>
             </div>
           </div>
         </aside>
