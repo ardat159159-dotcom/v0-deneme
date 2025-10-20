@@ -233,7 +233,7 @@ function AdminPanel() {
         {activeTab === 'dashboard' && stats && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Platform İstatistikleri</h2>
-            <div className="grid md:grid-cols-4 gap-6">
+            <div className="grid md:grid-cols-5 gap-6">
               <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
                 <div className="flex items-center justify-between mb-4">
                   <Users className="w-8 h-8 text-blue-500" />
