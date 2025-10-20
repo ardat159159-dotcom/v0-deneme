@@ -148,15 +148,18 @@ backend:
 
   - task: "Earnings Logging with IP + Timestamp"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created EarningLog model with IP address and user agent tracking. Updated add_earning() function to accept Request parameter and log IP + timestamp to earnings_logs collection. Updated like_post and create_comment routes to pass Request."
+      - working: true
+        agent: "testing"
+        comment: "✅ Earnings logging working correctly. Tested like and comment actions - both generate earnings entries. Like action earned 0.01, comment action earned 0.02, totaling 0.03 for test user. Earnings are properly logged to both earnings and earnings_logs collections with IP address and timestamp tracking."
 
   - task: "Earnings Configuration System"
     implemented: true
