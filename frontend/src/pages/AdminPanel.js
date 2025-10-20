@@ -33,6 +33,8 @@ function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
+  const [earningsPage, setEarningsPage] = useState(1);
+  const [earningsTotal, setEarningsTotal] = useState(0);
 
   useEffect(() => {
     const admin = localStorage.getItem('adminUser');
