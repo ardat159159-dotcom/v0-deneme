@@ -81,6 +81,19 @@ function Live({ currentUser, onLogout }) {
     }
   };
 
+  const handleEndStream = async (streamId) => {
+    if (!window.confirm('Yayını sonlandırmak istediğinize emin misiniz?')) return;
+
+    try {
+      await axios.put(`${API}/streams/${streamId}/end`);
+      alert('Yayın sonlandırıldı!');
+      loadLiveStreams();
+    } catch (error) {
+      console.error('Error ending stream:', error);
+      alert('Yayın sonlandırılırken hata oluştu');
+    }
+  };
+
   if (loading) {
     return (
       <Layout currentUser={currentUser} onLogout={onLogout}>
