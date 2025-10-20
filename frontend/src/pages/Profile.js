@@ -1,261 +1,198 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Settings, Users, DollarSign, Edit2, Image as ImageIcon } from 'lucide-react';
+import { Camera, Edit3, Save, Heart, MessageCircle, TrendingUp } from 'lucide-react';
 import Layout from '../components/Layout';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-function Profile({ currentUser, onLogout, updateUser }) {
+function Profile({ currentUser, onLogout }) {
+  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState(currentUser);
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     username: currentUser.username,
     full_name: currentUser.full_name,
-    bio: currentUser.bio || '',
-    profile_picture: currentUser.profile_picture
+    bio: currentUser.bio || ''
   });
 
   useEffect(() => {
-    loadUserData();
+    loadUserPosts();
   }, []);
 
-  const loadUserData = async () => {
+  const loadUserPosts = async () => {
     try {
-      const [userRes, postsRes] = await Promise.all([
-        axios.get(`${API}/users/${currentUser.id}`),
-        axios.get(`${API}/posts`)
-      ]);
-
-      setUser(userRes.data);
-      const userPosts = postsRes.data.filter(p => p.user_id === currentUser.id);
-      setPosts(userPosts);
+      const response = await axios.get(`${API}/posts`);
+      const myPosts = response.data.filter(p => p.user_id === currentUser.id);
+      setPosts(myPosts);
     } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading posts:', error);
     }
   };
 
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    
+  const handleSaveProfile = async () => {
     try {
-      const response = await axios.put(`${API}/users/${currentUser.id}`, editForm);
-      setUser(response.data);
-      if (updateUser) {
-        updateUser(response.data);
-      }
-      setShowEditModal(false);
+      await axios.put(`${API}/users/${currentUser.id}`, editForm);
+      setUser({ ...user, ...editForm });
+      setIsEditing(false);
       alert('Profil güncellendi!');
-      loadUserData();
+      window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert(error.response?.data?.detail || 'Profil güncellenirken hata oluştu!');
+      alert('Profil güncellenirken hata oluştu');
     }
   };
-
-  if (loading) {
-    return (
-      <Layout currentUser={currentUser} onLogout={onLogout}>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout currentUser={currentUser} onLogout={onLogout}>
-      <div className="max-w-4xl mx-auto">
-        {/* Profile Header */}
-        <div className="bg-white rounded-3xl shadow-sm p-8 mb-6">
-          <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <img
-              src={user.profile_picture}
-              alt={user.username}
-              className="w-32 h-32 rounded-full object-cover border-4 border-purple-100"
-              data-testid="profile-avatar"
-            />
+      <div className="max-w-2xl mx-auto px-4 pb-20">
+        {/* Profile Header Card */}
+        <div className="glass-card p-6 mb-6">
+          <div className="flex flex-col items-center">
+            {/* Profile Picture */}
+            <div className="relative mb-4">
+              <img
+                src={user.profile_picture}
+                alt={user.username}
+                className="w-24 h-24 rounded-full object-cover ring-4 ring-orange-500"
+              />
+              <button className="absolute bottom-0 right-0 w-8 h-8 gradient-primary rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                <Camera className="w-4 h-4 text-white" />
+              </button>
+            </div>
 
-            <div className="flex-1 text-center md:text-left">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold" data-testid="profile-username">@{user.username}</h1>
-                  <p className="text-xl text-gray-600">{user.full_name}</p>
+            {/* Edit Mode */}
+            {isEditing ? (
+              <div className="w-full space-y-4">
+                <input
+                  type="text"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                  placeholder="Kullanıcı adı"
+                  className="w-full bg-zinc-900 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                />
+                <input
+                  type="text"
+                  value={editForm.full_name}
+                  onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                  placeholder="Ad Soyad"
+                  className="w-full bg-zinc-900 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                />
+                <textarea
+                  value={editForm.bio}
+                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                  placeholder="Bio"
+                  rows="3"
+                  className="w-full bg-zinc-900 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500 resize-none"
+                />
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveProfile}
+                    className="flex-1 btn-primary flex items-center justify-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    Kaydet
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex-1 px-4 py-3 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors"
+                  >
+                    İptal
+                  </button>
                 </div>
+              </div>
+            ) : (
+              <div className="text-center w-full">
+                <h1 className="text-2xl font-bold text-white mb-1">@{user.username}</h1>
+                <p className="text-lg text-gray-300 mb-2">{user.full_name}</p>
+                {user.bio && <p className="text-gray-400 mb-4">{user.bio}</p>}
+                
                 <button
-                  onClick={() => setShowEditModal(true)}
-                  className="flex items-center gap-2 px-6 py-2 border-2 border-purple-600 text-purple-600 rounded-full font-semibold hover:bg-purple-50"
-                  data-testid="edit-profile-btn"
+                  onClick={() => setIsEditing(true)}
+                  className="px-6 py-2 bg-zinc-800 text-white rounded-xl hover:bg-zinc-700 transition-colors flex items-center gap-2 mx-auto"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Edit3 className="w-4 h-4" />
                   Profili Düzenle
                 </button>
               </div>
+            )}
+          </div>
 
-              <p className="text-gray-700 mb-4">{user.bio || 'Henüz biografi yok'}</p>
-
-              {/* Stats */}
-              <div className="flex gap-6 justify-center md:justify-start">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{posts.length}</p>
-                  <p className="text-gray-600 text-sm">Gönderi</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{user.followers_count.toLocaleString()}</p>
-                  <p className="text-gray-600 text-sm">Takipçi</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{user.following_count.toLocaleString()}</p>
-                  <p className="text-gray-600 text-sm">Takip</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold gradient-text">${user.total_earnings.toFixed(2)}</p>
-                  <p className="text-gray-600 text-sm">Kazanç</p>
-                </div>
-              </div>
+          {/* Stats */}
+          <div className="grid grid-cols-4 gap-4 mt-6 pt-6 border-t border-zinc-800">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{posts.length}</p>
+              <p className="text-xs text-gray-400">Gönderi</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{user.followers_count}</p>
+              <p className="text-xs text-gray-400">Takipçi</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{user.following_count}</p>
+              <p className="text-xs text-gray-400">Takip</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-orange-500">${user.total_earnings?.toFixed(2) || '0.00'}</p>
+              <p className="text-xs text-gray-400">Kazanç</p>
             </div>
           </div>
         </div>
 
-        {/* User Posts Grid */}
-        <div className="bg-white rounded-3xl shadow-sm p-6">
-          <h2 className="text-2xl font-bold mb-6">Gönderilerim</h2>
-          
-          {posts.length === 0 ? (
-            <div className="text-center py-20">
-              <ImageIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">Henüz gönderi yok</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80"
-                >
-                  {post.image_url ? (
-                    <img
-                      src={post.image_url}
-                      alt="Post"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center p-4">
-                      <p className="text-sm text-gray-600 line-clamp-3">{post.content}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+        {/* Posts Section */}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">Gönderilerim</h2>
+          <div className="flex items-center gap-2 text-gray-400">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-sm">{posts.length} gönderi</span>
+          </div>
         </div>
-      </div>
 
-      {/* Edit Profile Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Profili Düzenle</h2>
-            <form onSubmit={handleEdit}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kullanıcı Adı
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.username}
-                    onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                    placeholder="kullanici_adi"
+        {posts.length === 0 ? (
+          <div className="glass-card p-12 text-center">
+            <p className="text-gray-400">Henüz gönderi paylaşmadın</p>
+            <button
+              onClick={() => navigate('/feed')}
+              className="btn-primary mt-4 px-6 py-2"
+            >
+              İlk Gönderiyi Paylaş
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {posts.map((post) => (
+              <div
+                key={post.id}
+                className="aspect-square glass-card overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+              >
+                {post.image_url ? (
+                  <img
+                    src={post.image_url}
+                    alt="Post"
+                    className="w-full h-full object-cover"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ad Soyad
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.full_name}
-                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Profil Fotoğrafı URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editForm.profile_picture}
-                    onChange={(e) => setEditForm({ ...editForm, profile_picture: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                    placeholder="https://example.com/photo.jpg"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Veya otomatik avatar kullan: https://api.dicebear.com/7.x/avataaars/svg?seed={editForm.username}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Biografi
-                  </label>
-                  <textarea
-                    value={editForm.bio}
-                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none resize-none"
-                    rows="3"
-                    placeholder="Kendinizden bahsedin..."
-                  />
-                </div>
-
-                {/* Preview */}
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Önizleme:</p>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={editForm.profile_picture}
-                      alt="Preview"
-                      className="w-16 h-16 rounded-full object-cover"
-                      onError={(e) => {
-                        e.target.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${editForm.username}`;
-                      }}
-                    />
-                    <div>
-                      <p className="font-bold">@{editForm.username}</p>
-                      <p className="text-sm text-gray-600">{editForm.full_name}</p>
-                      <p className="text-sm text-gray-500">{editForm.bio || 'Bio yok'}</p>
-                    </div>
+                ) : (
+                  <div className="w-full h-full bg-zinc-900 flex items-center justify-center p-2">
+                    <p className="text-white text-xs line-clamp-6">{post.content}</p>
                   </div>
+                )}
+                <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-50 transition-all flex items-center justify-center gap-4 opacity-0 hover:opacity-100">
+                  <span className="text-white flex items-center gap-1">
+                    <Heart className="w-4 h-4" />
+                    {post.likes_count}
+                  </span>
+                  <span className="text-white flex items-center gap-1">
+                    <MessageCircle className="w-4 h-4" />
+                    {post.comments_count}
+                  </span>
                 </div>
               </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="flex-1 py-3 border-2 border-gray-300 rounded-xl font-semibold hover:bg-gray-50"
-                >
-                  İptal
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg"
-                >
-                  Kaydet
-                </button>
-              </div>
-            </form>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Layout>
   );
 }
