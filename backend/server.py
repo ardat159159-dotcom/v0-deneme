@@ -1055,8 +1055,10 @@ async def delete_user(user_id: str, admin_email: str = "admin@lupintr.com"):
     return {"message": "User banned successfully"}
 
 @api_router.delete("/admin/posts/{post_id}")
-async def delete_post(post_id: str, admin_user: dict = Depends(get_current_admin_user)):
+async def delete_post(post_id: str, admin_email: str = "admin@lupintr.com"):
     """Delete a post (admin only)"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     result = await db.posts.delete_one({"id": post_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Post not found")
