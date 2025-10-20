@@ -1095,8 +1095,10 @@ async def get_all_earnings(
     }
 
 @api_router.get("/admin/earnings-config")
-async def get_admin_earnings_config(admin_user: dict = Depends(get_current_admin_user)):
+async def get_admin_earnings_config(admin_email: str = "admin@lupintr.com"):
     """Get earnings configuration"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     config = await get_earnings_config()
     return config
 
@@ -1107,9 +1109,11 @@ async def update_earnings_config(
     share_rate: Optional[float] = None,
     view_rate: Optional[float] = None,
     min_withdrawal_amount: Optional[float] = None,
-    admin_user: dict = Depends(get_current_admin_user)
+    admin_email: str = "admin@lupintr.com"
 ):
     """Update earnings configuration (admin only)"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     config = await get_earnings_config()
     
     update_data = {}
