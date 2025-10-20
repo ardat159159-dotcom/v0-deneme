@@ -178,15 +178,18 @@ backend:
 
   - task: "Withdrawal Verification System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Replaced single withdrawal endpoint with two-step process: POST /withdrawals/request (generates 6-digit code, stores in withdrawal_verifications collection, expires in 10 min) and POST /withdrawals/verify (validates code and processes withdrawal). Includes rate limiting (5/hour) and minimum amount check from earnings config."
+      - working: true
+        agent: "testing"
+        comment: "✅ Withdrawal verification system working correctly. Two-step process implemented: 1) POST /withdrawals/request generates verification code and checks KYC, minimum amount, and balance. 2) POST /withdrawals/verify validates code and processes withdrawal. KYC verification, unique TC ID validation, and balance checks are all functioning properly. Initial test failure was due to insufficient user balance, which is correct behavior."
 
   - task: "Admin Route Protection"
     implemented: true
