@@ -133,15 +133,18 @@ backend:
 
   - task: "Rate Limiting"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added slowapi rate limiting. Register: 5/min, Login: 10/min, Like: 30/min, Comment: 20/min, Withdrawal Request: 5/hour."
+      - working: false
+        agent: "testing"
+        comment: "❌ Rate limiting not working as expected. Tested registration (5/min limit) and login (10/min limit) with rapid requests but rate limiting was not triggered. The slowapi configuration appears correct with proper decorators and middleware setup. Issue may be related to load balancing or IP address detection in Kubernetes environment. Requests from different IPs may not be properly rate limited."
 
   - task: "Earnings Logging with IP + Timestamp"
     implemented: true
