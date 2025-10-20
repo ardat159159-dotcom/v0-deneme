@@ -626,7 +626,8 @@ async def get_stories():
 # ==================== COMMENT ROUTES ====================
 
 @api_router.post("/comments")
-async def create_comment(comment: CommentCreate):
+@limiter.limit("20/minute")
+async def create_comment(comment: CommentCreate, request: Request):
     user = await db.users.find_one({"id": comment.user_id}, {"_id": 0})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -652,8 +653,11 @@ async def create_comment(comment: CommentCreate):
             {"$set": {"comments_count": new_count}}
         )
         
-        # Add earning to post owner (0.02 per comment)
-        await add_earning(post['user_id'], 0.02, "comment", comment.post_id)
+        # Get earnings config
+        config = await get_earnings_config()
+        
+        # Add earning to post owner with IP logging
+        await add_earning(post['user_id'], config.comment_rate, "comment", comment.post_id, request)
     
     return new_comment
 
