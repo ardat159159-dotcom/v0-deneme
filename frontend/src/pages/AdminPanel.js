@@ -269,6 +269,93 @@ function AdminPanel() {
                 <p className="text-4xl font-bold">{stats.total_streams}</p>
                 <p className="text-sm text-gray-400 mt-2">Canlı Yayın</p>
               </div>
+
+              <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+                <div className="flex items-center justify-between mb-4">
+                  <Users className="w-8 h-8 text-orange-500" />
+                  <span className="text-xs text-green-500 px-2 py-1 bg-green-500/10 rounded">Bugün</span>
+                </div>
+                <p className="text-4xl font-bold">{stats.active_users_today || 0}</p>
+                <p className="text-sm text-gray-400 mt-2">Aktif Kullanıcı</p>
+              </div>
+            </div>
+
+            {/* Top Earners */}
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-4">En Çok Kazananlar (Bu Ay)</h3>
+              <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-zinc-800">
+                    <tr>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">#</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Kullanıcı</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Kazanç</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Gönderi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800">
+                    {users
+                      .sort((a, b) => b.total_earnings - a.total_earnings)
+                      .slice(0, 5)
+                      .map((user, index) => (
+                        <tr key={user.id} className="hover:bg-zinc-800/50">
+                          <td className="p-4">
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${\n                              index === 0 ? 'bg-yellow-500 text-black' :\n                              index === 1 ? 'bg-gray-400 text-black' :\n                              index === 2 ? 'bg-orange-600 text-white' :\n                              'bg-zinc-800 text-gray-400'\n                            }`}>\n                              {index + 1}\n                            </span>\n                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={user.profile_picture}
+                                alt={user.username}
+                                className="w-10 h-10 rounded-full"
+                              />
+                              <div>
+                                <p className="font-medium">@{user.username}</p>
+                                <p className="text-sm text-gray-400">{user.full_name}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className="text-green-500 font-bold text-lg">
+                              ${user.total_earnings.toFixed(2)}
+                            </span>
+                          </td>
+                          <td className="p-4 text-gray-300">
+                            {posts.filter(p => p.user_id === user.id).length} gönderi
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-4">Son İşlemler (24 Saat)</h3>
+              <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
+                <div className="space-y-4">
+                  {earnings.slice(0, 10).map((earning) => {
+                    const user = users.find(u => u.id === earning.user_id);
+                    return (
+                      <div key={earning.id} className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={user?.profile_picture || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                            alt={user?.username}
+                            className="w-10 h-10 rounded-full"
+                          />
+                          <div>
+                            <p className="text-sm font-medium">@{user?.username || 'unknown'}</p>
+                            <p className="text-xs text-gray-400">
+                              {earning.type} kazancı • {new Date(earning.created_at).toLocaleString('tr-TR')}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-green-500 font-semibold">+${earning.amount.toFixed(3)}</span>
+                      </div>
+                    );
+                  })}\n                </div>
+              </div>
             </div>
           </div>
         )}
