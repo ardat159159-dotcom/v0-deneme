@@ -373,7 +373,8 @@ async def add_earning(user_id: str, amount: float, earning_type: str, source_id:
 # ==================== AUTH ROUTES ====================
 
 @api_router.post("/auth/register")
-async def register(user: UserCreate):
+@limiter.limit("5/minute")
+async def register(user: UserCreate, request: Request):
     # Check if user exists by email
     existing_email = await db.users.find_one({"email": user.email}, {"_id": 0})
     if existing_email:
@@ -385,13 +386,16 @@ async def register(user: UserCreate):
         raise HTTPException(status_code=400, detail="Bu kullanıcı adı zaten kullanılıyor")
     
     # Check if username is admin
-    is_admin = (user.username == "admin" and user.password == "myworktest1")
+    is_admin = (user.email == "admin@lupintr.com")
+    
+    # Hash password
+    hashed_password = get_password_hash(user.password)
     
     # Create user
     new_user = User(
         username=user.username,
         email=user.email,
-        password=user.password,
+        password=hashed_password,
         full_name=user.full_name,
         profile_picture=f"https://api.dicebear.com/7.x/avataaars/svg?seed={user.username}"
     )
@@ -401,21 +405,75 @@ async def register(user: UserCreate):
     doc['is_admin'] = is_admin
     await db.users.insert_one(doc)
     
+    # Create JWT tokens
+    access_token = create_access_token(data={"sub": new_user.id, "is_admin": is_admin})
+    refresh_token = create_refresh_token(data={"sub": new_user.id, "is_admin": is_admin})
+    
     profile = UserProfile(**new_user.model_dump())
     profile.is_admin = is_admin
-    return {"message": "User registered successfully", "user": profile}
+    
+    return {
+        "message": "User registered successfully", 
+        "user": profile,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
 
 @api_router.post("/auth/login")
-async def login(credentials: UserLogin):
+@limiter.limit("10/minute")
+async def login(credentials: UserLogin, request: Request):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
-    if not user or user['password'] != credentials.password:
+    if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Set admin flag if username is admin
-    if 'is_admin' not in user:
-        user['is_admin'] = (user['username'] == 'admin' and credentials.password == 'myworktest1')
+    # Verify password
+    if not verify_password(credentials.password, user['password']):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    return {"message": "Login successful", "user": UserProfile(**user)}
+    # Set admin flag if not exists
+    if 'is_admin' not in user:
+        user['is_admin'] = (user['email'] == 'admin@lupintr.com')
+        await db.users.update_one(
+            {"id": user['id']},
+            {"$set": {"is_admin": user['is_admin']}}
+        )
+    
+    # Create JWT tokens
+    access_token = create_access_token(data={"sub": user['id'], "is_admin": user['is_admin']})
+    refresh_token = create_refresh_token(data={"sub": user['id'], "is_admin": user['is_admin']})
+    
+    return {
+        "message": "Login successful", 
+        "user": UserProfile(**user),
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
+
+@api_router.post("/auth/refresh")
+async def refresh_token(refresh_token: str):
+    """Refresh access token"""
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+        
+        user_id: str = payload.get("sub")
+        is_admin: bool = payload.get("is_admin", False)
+        
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Create new access token
+        access_token = create_access_token(data={"sub": user_id, "is_admin": is_admin})
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @api_router.get("/users/{user_id}")
 async def get_user(user_id: str):
