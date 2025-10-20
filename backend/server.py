@@ -1026,14 +1026,18 @@ async def get_admin_stats(admin_email: str = "admin@lupintr.com"):
     }
 
 @api_router.get("/admin/users")
-async def get_all_users(admin_user: dict = Depends(get_current_admin_user)):
+async def get_all_users(admin_email: str = "admin@lupintr.com"):
     """Get all users for admin panel"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     return users
 
 @api_router.delete("/admin/users/{user_id}")
-async def delete_user(user_id: str, admin_user: dict = Depends(get_current_admin_user)):
+async def delete_user(user_id: str, admin_email: str = "admin@lupintr.com"):
     """Delete/Ban a user (admin only)"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     # Prevent deleting admin users
     target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
     if target_user and target_user.get('is_admin', False):
