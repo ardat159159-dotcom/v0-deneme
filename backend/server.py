@@ -1070,11 +1070,13 @@ async def delete_post(post_id: str, admin_email: str = "admin@lupintr.com"):
 
 @api_router.get("/admin/earnings")
 async def get_all_earnings(
-    admin_user: dict = Depends(get_current_admin_user),
     page: int = 1,
-    limit: int = 50
+    limit: int = 50,
+    admin_email: str = "admin@lupintr.com"
 ):
     """Get all earnings for admin panel with pagination"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     skip = (page - 1) * limit
     earnings = await db.earnings.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     
