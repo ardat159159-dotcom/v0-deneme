@@ -931,7 +931,7 @@ async def get_notifications(user_id: str):
 # ==================== ADMIN ROUTES ====================
 
 @api_router.get("/admin/stats")
-async def get_admin_stats():
+async def get_admin_stats(admin_user: dict = Depends(get_current_admin_user)):
     """Get platform statistics for admin dashboard"""
     total_users = await db.users.count_documents({})
     total_posts = await db.posts.count_documents({})
@@ -939,22 +939,34 @@ async def get_admin_stats():
     total_earnings_cursor = await db.earnings.find({}, {"_id": 0, "amount": 1}).to_list(100000)
     total_earnings = sum(e['amount'] for e in total_earnings_cursor)
     
+    # Get today's active users
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    active_users_today = await db.earnings_logs.distinct("user_id", {
+        "created_at": {"$gte": today.isoformat()}
+    })
+    
     return {
         "total_users": total_users,
         "total_posts": total_posts,
         "total_streams": total_streams,
-        "total_earnings_paid": total_earnings
+        "total_earnings_paid": total_earnings,
+        "active_users_today": len(active_users_today) if isinstance(active_users_today, list) else 0
     }
 
 @api_router.get("/admin/users")
-async def get_all_users():
+async def get_all_users(admin_user: dict = Depends(get_current_admin_user)):
     """Get all users for admin panel"""
     users = await db.users.find({}, {"_id": 0, "password": 0}).to_list(1000)
     return users
 
 @api_router.delete("/admin/users/{user_id}")
-async def delete_user(user_id: str):
-    """Delete a user (admin only)"""
+async def delete_user(user_id: str, admin_user: dict = Depends(get_current_admin_user)):
+    """Delete/Ban a user (admin only)"""
+    # Prevent deleting admin users
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if target_user and target_user.get('is_admin', False):
+        raise HTTPException(status_code=403, detail="Cannot ban admin users")
+    
     result = await db.users.delete_one({"id": user_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
@@ -964,10 +976,10 @@ async def delete_user(user_id: str):
     await db.comments.delete_many({"user_id": user_id})
     await db.stories.delete_many({"user_id": user_id})
     
-    return {"message": "User deleted successfully"}
+    return {"message": "User banned successfully"}
 
 @api_router.delete("/admin/posts/{post_id}")
-async def delete_post(post_id: str):
+async def delete_post(post_id: str, admin_user: dict = Depends(get_current_admin_user)):
     """Delete a post (admin only)"""
     result = await db.posts.delete_one({"id": post_id})
     if result.deleted_count == 0:
@@ -979,15 +991,67 @@ async def delete_post(post_id: str):
     return {"message": "Post deleted successfully"}
 
 @api_router.get("/admin/earnings")
-async def get_all_earnings():
-    """Get all earnings for admin panel"""
-    earnings = await db.earnings.find({}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+async def get_all_earnings(
+    admin_user: dict = Depends(get_current_admin_user),
+    page: int = 1,
+    limit: int = 50
+):
+    """Get all earnings for admin panel with pagination"""
+    skip = (page - 1) * limit
+    earnings = await db.earnings.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     
     for earning in earnings:
         if isinstance(earning['created_at'], str):
             earning['created_at'] = datetime.fromisoformat(earning['created_at'])
     
-    return earnings
+    # Get total count
+    total_count = await db.earnings.count_documents({})
+    
+    return {
+        "earnings": earnings,
+        "total": total_count,
+        "page": page,
+        "pages": (total_count + limit - 1) // limit
+    }
+
+@api_router.get("/admin/earnings-config")
+async def get_admin_earnings_config(admin_user: dict = Depends(get_current_admin_user)):
+    """Get earnings configuration"""
+    config = await get_earnings_config()
+    return config
+
+@api_router.put("/admin/earnings-config")
+async def update_earnings_config(
+    like_rate: Optional[float] = None,
+    comment_rate: Optional[float] = None,
+    share_rate: Optional[float] = None,
+    view_rate: Optional[float] = None,
+    min_withdrawal_amount: Optional[float] = None,
+    admin_user: dict = Depends(get_current_admin_user)
+):
+    """Update earnings configuration (admin only)"""
+    config = await get_earnings_config()
+    
+    update_data = {}
+    if like_rate is not None:
+        update_data['like_rate'] = like_rate
+    if comment_rate is not None:
+        update_data['comment_rate'] = comment_rate
+    if share_rate is not None:
+        update_data['share_rate'] = share_rate
+    if view_rate is not None:
+        update_data['view_rate'] = view_rate
+    if min_withdrawal_amount is not None:
+        update_data['min_withdrawal_amount'] = min_withdrawal_amount
+    
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    await db.earnings_config.update_one(
+        {"id": config.id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Earnings config updated successfully"}
 
 # ==================== SEED DATA ROUTE ====================
 
