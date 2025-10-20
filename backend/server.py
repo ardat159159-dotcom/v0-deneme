@@ -561,7 +561,8 @@ async def get_post(post_id: str):
     return Post(**post)
 
 @api_router.post("/posts/{post_id}/like")
-async def like_post(post_id: str, user_id: str):
+@limiter.limit("30/minute")
+async def like_post(post_id: str, user_id: str, request: Request):
     post = await db.posts.find_one({"id": post_id}, {"_id": 0})
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
@@ -573,8 +574,11 @@ async def like_post(post_id: str, user_id: str):
         {"$set": {"likes_count": new_count}}
     )
     
-    # Add earning to post owner (0.01 per like)
-    await add_earning(post['user_id'], 0.01, "like", post_id)
+    # Get earnings config
+    config = await get_earnings_config()
+    
+    # Add earning to post owner with IP logging
+    await add_earning(post['user_id'], config.like_rate, "like", post_id, request)
     
     return {"message": "Post liked", "likes_count": new_count}
 
