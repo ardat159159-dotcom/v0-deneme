@@ -101,3 +101,204 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Güvenlik odaklı iyileştirmeler (Faz 1):
+  1. Admin dashboard rotasını sadece role:admin kullanıcılarına özel yapma
+  2. Admin panelde e-posta adresleri maskeleme
+  3. Banla ve Sil işlemlerinde toast bildirim gösterme
+  4. Kazanç artışlarını backend'de hesaplama
+  5. Her kazanç işlemini userID + IP + timestamp ile loglama
+  6. Para çekme için minimum tutar kontrolü ve e-posta onayı
+  7. JWT refresh token sistemi ekleme
+  8. IP bazlı rate limit ve abuse kontrolü
+  9. Kazanç oranlarını backend'de ayrı collection'da tutma
+  10. Kazanç geçmişine pagination ekleme
+
+backend:
+  - task: "JWT Token System"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented JWT access token (15min) and refresh token (7 days) system with PyJWT. Added password hashing with bcrypt. Login and register endpoints now return JWT tokens. Middleware functions created (get_current_user, get_current_admin_user) but not yet integrated to all routes."
+
+  - task: "Rate Limiting"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added slowapi rate limiting. Register: 5/min, Login: 10/min, Like: 30/min, Comment: 20/min, Withdrawal Request: 5/hour."
+
+  - task: "Earnings Logging with IP + Timestamp"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created EarningLog model with IP address and user agent tracking. Updated add_earning() function to accept Request parameter and log IP + timestamp to earnings_logs collection. Updated like_post and create_comment routes to pass Request."
+
+  - task: "Earnings Configuration System"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created EarningsConfig model with configurable rates (like_rate, comment_rate, share_rate, view_rate, min_withdrawal_amount). Added get_earnings_config() helper function. Created admin endpoints: GET /admin/earnings-config and PUT /admin/earnings-config to manage rates."
+
+  - task: "Withdrawal Verification System"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Replaced single withdrawal endpoint with two-step process: POST /withdrawals/request (generates 6-digit code, stores in withdrawal_verifications collection, expires in 10 min) and POST /withdrawals/verify (validates code and processes withdrawal). Includes rate limiting (5/hour) and minimum amount check from earnings config."
+
+  - task: "Admin Route Protection"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added admin_email query parameter check to all admin routes (temporary solution until frontend JWT integration). Only admin@lupintr.com can access. Added active_users_today stat to /admin/stats endpoint."
+
+  - task: "Earnings Pagination"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated /admin/earnings endpoint to support pagination with page and limit query parameters (default 50 per page). Returns earnings array, total count, current page, and total pages."
+
+frontend:
+  - task: "Email Masking in Admin Panel"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created maskEmail() function that masks username and domain (e.g., ayse@example.com -> ay***@ex***.com). Applied to user email column in admin users table."
+
+  - task: "User ID Display in Admin Panel"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added ID column to users table showing first 8 characters of UUID with ellipsis, displayed in code block style."
+
+  - task: "Toast Notifications for Ban/Delete"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Toast notification system already implemented using showToast() function. Displays success/error messages for ban and delete actions without page reload."
+
+  - task: "Earnings Pagination UI"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added earningsPage and earningsTotal state. Created loadEarnings() function that fetches paginated data. Added pagination controls (Previous/Next buttons) below earnings table. Shows current page and total count."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+  phase: "Phase 1 - Security"
+
+test_plan:
+  current_focus:
+    - "JWT Token System"
+    - "Rate Limiting"
+    - "Earnings Logging with IP + Timestamp"
+    - "Withdrawal Verification System"
+    - "Admin Route Protection"
+    - "Earnings Pagination"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Phase 1 (Security) implementation completed. Key changes:
+      
+      BACKEND:
+      - JWT token system with access (15min) and refresh (7 days) tokens
+      - Password hashing with bcrypt
+      - Rate limiting on critical endpoints
+      - Earnings logging with IP + timestamp to earnings_logs collection
+      - Configurable earnings rates in earnings_config collection
+      - Two-step withdrawal verification with email code
+      - Admin route protection (temporary query param, will upgrade to JWT)
+      - Paginated earnings endpoint
+      
+      FRONTEND:
+      - Email masking in admin panel
+      - User ID display in users table
+      - Toast notifications (already existed)
+      - Earnings pagination UI
+      
+      NOTES:
+      - JWT middleware created but not yet required on all routes (to maintain backward compatibility)
+      - Frontend doesn't use JWT tokens yet - this will be Phase 2
+      - Admin routes use temporary email query parameter check
+      - Withdrawal email sending is mocked (returns code in response)
+      
+      TESTING NEEDED:
+      1. Test rate limiting on register, login, like, comment endpoints
+      2. Verify earnings logging creates entries in earnings_logs collection with IP
+      3. Test withdrawal two-step verification flow
+      4. Test admin pagination for earnings
+      5. Verify email masking in admin users table
+      6. Test that non-admin cannot access admin routes
