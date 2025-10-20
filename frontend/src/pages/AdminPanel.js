@@ -286,6 +286,11 @@ function AdminPanel() {
                   {filteredUsers.map((user) => (
                     <tr key={user.id} className="hover:bg-zinc-800/50">
                       <td className="p-4">
+                        <code className="text-xs text-gray-500 bg-zinc-800 px-2 py-1 rounded">
+                          {user.id.substring(0, 8)}...
+                        </code>
+                      </td>
+                      <td className="p-4">
                         <div className="flex items-center gap-3">
                           <img
                             src={user.profile_picture}
