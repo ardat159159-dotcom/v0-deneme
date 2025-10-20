@@ -156,7 +156,6 @@ function Settings({ currentUser, onLogout }) {
         {/* App Info */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">lupintr v1.0</p>
-          <p className="text-xs text-gray-600 mt-1">Made with Emergent</p>
         </div>
       </div>
     </Layout>
