@@ -150,7 +150,7 @@ function Live({ currentUser, onLogout }) {
 
               {/* Stream Info */}
               <div className="p-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 mb-3">
                   <img
                     src={stream.user_avatar}
                     alt={stream.username}
@@ -162,6 +162,19 @@ function Live({ currentUser, onLogout }) {
                     <p className="text-sm text-gray-500 line-clamp-2">{stream.description}</p>
                   </div>
                 </div>
+                
+                {/* End Stream Button (only for stream owner) */}
+                {currentUser && stream.user_id === currentUser.id && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEndStream(stream.id);
+                    }}
+                    className="w-full px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                  >
+                    Yayını Sonlandır
+                  </button>
+                )}
               </div>
             </div>
           ))}
