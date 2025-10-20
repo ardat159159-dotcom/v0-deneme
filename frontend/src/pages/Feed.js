@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Heart, MessageCircle, Share2, Send, Plus, X } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Send, Plus, Bookmark, TrendingUp, Hash } from 'lucide-react';
 import Layout from '../components/Layout';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -10,12 +10,18 @@ function Feed({ currentUser, onLogout }) {
   const [posts, setPosts] = useState([]);
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newPost, setNewPost] = useState({ content: '', image_url: '' });
-  const [showPostModal, setShowPostModal] = useState(false);
+  const [newPost, setNewPost] = useState('');
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [likedPosts, setLikedPosts] = useState(new Set());
+  const [trendingTopics, setTrendingTopics] = useState([
+    { tag: 'keşfet', count: 1234 },
+    { tag: 'trend', count: 856 },
+    { tag: 'müzik', count: 645 },
+    { tag: 'sanat', count: 432 }
+  ]);
 
   useEffect(() => {
     loadFeed();
@@ -38,18 +44,17 @@ function Feed({ currentUser, onLogout }) {
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
-    if (!newPost.content.trim()) return;
+    if (!newPost.trim()) return;
 
     try {
-      await axios.post(`${API}/posts`, {
+      const response = await axios.post(`${API}/posts`, {
         user_id: currentUser.id,
-        content: newPost.content,
-        image_url: newPost.image_url || null
+        content: newPost
       });
 
-      setNewPost({ content: '', image_url: '' });
-      setShowPostModal(false);
-      loadFeed();
+      setPosts([response.data, ...posts]);
+      setNewPost('');
+      setShowCreatePost(false);
     } catch (error) {
       console.error('Error creating post:', error);
     }
@@ -57,27 +62,47 @@ function Feed({ currentUser, onLogout }) {
 
   const handleLike = async (postId) => {
     try {
-      // Optimistic UI update
-      setLikedPosts(prev => {
-        const newSet = new Set(prev);
-        if (newSet.has(postId)) {
-          newSet.delete(postId);
-        } else {
-          newSet.add(postId);
-        }
-        return newSet;
-      });
-
-      await axios.post(`${API}/posts/${postId}/like?user_id=${currentUser.id}`);
-      loadFeed();
+      const response = await axios.post(`${API}/posts/${postId}/like?user_id=${currentUser.id}`);
+      
+      setPosts(posts.map(p => 
+        p.id === postId 
+          ? { ...p, likes_count: response.data.likes_count }
+          : p
+      ));
+      
+      setLikedPosts(new Set([...likedPosts, postId]));
+      
+      // Like animation
+      const likeBtn = document.getElementById(`like-${postId}`);
+      if (likeBtn) {
+        likeBtn.classList.add('like-animation');
+        setTimeout(() => likeBtn.classList.remove('like-animation'), 300);
+      }
     } catch (error) {
       console.error('Error liking post:', error);
-      // Revert optimistic update on error
-      setLikedPosts(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(postId);
-        return newSet;
+    }
+  };
+
+  const handleComment = async (e, postId) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    try {
+      const response = await axios.post(`${API}/comments`, {
+        post_id: postId,
+        user_id: currentUser.id,
+        content: newComment
       });
+
+      setComments([...comments, response.data]);
+      setPosts(posts.map(p =>
+        p.id === postId
+          ? { ...p, comments_count: p.comments_count + 1 }
+          : p
+      ));
+      setNewComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
     }
   };
 
@@ -85,45 +110,18 @@ function Feed({ currentUser, onLogout }) {
     try {
       const response = await axios.get(`${API}/comments/${postId}`);
       setComments(response.data);
+      setSelectedPost(postId);
     } catch (error) {
       console.error('Error loading comments:', error);
     }
   };
 
-  const handleComment = async (postId) => {
-    if (!newComment.trim()) return;
-
-    try {
-      await axios.post(`${API}/comments`, {
-        post_id: postId,
-        user_id: currentUser.id,
-        content: newComment
-      });
-
-      setNewComment('');
-      loadComments(postId);
-      loadFeed();
-    } catch (error) {
-      console.error('Error posting comment:', error);
-    }
-  };
-
-  const formatTimeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-
-    if (seconds < 60) return 'Az önce';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}dk`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}s`;
-    return `${Math.floor(seconds / 86400)}g`;
-  };
-
   if (loading) {
     return (
       <Layout currentUser={currentUser} onLogout={onLogout}>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin"
+               style={{ borderColor: '#F56040', borderTopColor: 'transparent' }}></div>
         </div>
       </Layout>
     );
@@ -131,71 +129,126 @@ function Feed({ currentUser, onLogout }) {
 
   return (
     <Layout currentUser={currentUser} onLogout={onLogout}>
-      <div className="max-w-2xl mx-auto app-container pb-20">
-        {/* Stories */}
-        <div className="bg-card rounded-2xl p-4 mb-4 border border-border">
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {/* Add Story */}
-            <div className="flex-shrink-0 text-center cursor-pointer">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center">
-                <Plus className="w-8 h-8 text-white" />
-              </div>
-              <p className="text-xs mt-1 text-foreground">Hikaye</p>
-            </div>
-
-            {/* Stories */}
-            {stories.slice(0, 10).map((story) => (
-              <div key={story.id} className="flex-shrink-0 text-center cursor-pointer">
-                <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-r from-purple-600 to-pink-600">
-                  <img
-                    src={story.user_avatar}
-                    alt={story.username}
-                    className="w-full h-full rounded-full border-2 border-card object-cover"
-                  />
+      <div className="max-w-2xl mx-auto px-4 pb-20">
+        {/* Stories Section */}
+        {stories.length > 0 && (
+          <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+            {stories.map((story) => (
+              <div key={story.id} className="flex-shrink-0">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full p-0.5 gradient-primary">
+                    <img
+                      src={story.user_avatar}
+                      alt={story.username}
+                      className="w-full h-full rounded-full border-2 border-black object-cover"
+                    />
+                  </div>
+                  <p className="text-xs text-center mt-1 text-gray-300 truncate w-16">
+                    {story.username}
+                  </p>
                 </div>
-                <p className="text-xs mt-1 truncate w-16 text-foreground">{story.username}</p>
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Trending Topics */}
+        <div className="glass-card p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-5 h-5 text-orange-500" />
+            <h2 className="font-bold text-white">Trend Konular</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {trendingTopics.map((topic) => (
+              <button
+                key={topic.tag}
+                className="px-4 py-2 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-orange-500/20 transition-all"
+              >
+                <div className="flex items-center gap-2">
+                  <Hash className="w-4 h-4 text-orange-500" />
+                  <span className="text-sm font-medium text-white">{topic.tag}</span>
+                  <span className="text-xs text-gray-500">{topic.count}</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Create Post */}
-        <div className="bg-card rounded-2xl p-4 mb-4 border border-border">
-          <div className="flex gap-3">
-            <img
-              src={currentUser.profile_picture}
-              alt={currentUser.username}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <button
-              onClick={() => setShowPostModal(true)}
-              className="flex-1 text-left px-4 py-2 bg-muted rounded-full text-muted-foreground hover:bg-muted/80 transition-colors"
-            >
-              Ne düşünüyorsun?
-            </button>
-          </div>
+        {/* Create Post Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowCreatePost(!showCreatePost)}
+            className="w-full glass-card p-4 text-left hover:bg-zinc-900 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <img
+                src={currentUser.profile_picture}
+                alt={currentUser.username}
+                className="w-10 h-10 rounded-full"
+              />
+              <span className="text-gray-400">Ne düşünüyorsun?</span>
+              <Plus className="w-5 h-5 text-orange-500 ml-auto" />
+            </div>
+          </button>
         </div>
 
+        {/* Create Post Form */}
+        {showCreatePost && (
+          <div className="glass-card p-4 mb-6">
+            <form onSubmit={handleCreatePost}>
+              <textarea
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                placeholder="Paylaş..."
+                className="w-full bg-transparent text-white border-none outline-none resize-none"
+                rows="3"
+              />
+              <div className="flex justify-between items-center mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreatePost(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary px-6 py-2"
+                  disabled={!newPost.trim()}
+                >
+                  Paylaş
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Posts Feed */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {posts.map((post) => (
-            <div key={post.id} className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div key={post.id} className="glass-card overflow-hidden">
               {/* Post Header */}
               <div className="p-4 flex items-center gap-3">
                 <img
                   src={post.user_avatar}
                   alt={post.username}
-                  className="w-10 h-10 rounded-full object-cover"
+                  className="w-10 h-10 rounded-full cursor-pointer hover:ring-2 ring-orange-500 transition-all"
+                  onClick={() => window.location.href = `/profile/${post.user_id}`}
                 />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">@{post.username}</h3>
-                  <p className="text-sm text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
+                  <h3 className="font-semibold text-white hover:text-orange-500 cursor-pointer transition-colors"
+                      onClick={() => window.location.href = `/profile/${post.user_id}`}>
+                    @{post.username}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {new Date(post.created_at).toLocaleDateString('tr-TR')}
+                  </p>
                 </div>
               </div>
 
               {/* Post Content */}
-              <div className="px-4 pb-2">
-                <p className="text-foreground">{post.content}</p>
+              <div className="px-4 pb-3">
+                <p className="text-white text-[15px] leading-relaxed">{post.content}</p>
               </div>
 
               {/* Post Image */}
@@ -208,152 +261,99 @@ function Feed({ currentUser, onLogout }) {
               )}
 
               {/* Post Actions */}
-              <div className="p-4 border-t border-border">
-                <div className="flex items-center justify-between text-muted-foreground mb-3">
-                  <span className="text-sm">{post.likes_count.toLocaleString()} beğeni</span>
-                  <span className="text-sm">{post.comments_count} yorum</span>
-                </div>
-
-                <div className="flex gap-4">
+              <div className="px-4 py-3 flex items-center justify-between border-t border-zinc-800">
+                <div className="flex items-center gap-6">
+                  {/* Like Button */}
                   <button
+                    id={`like-${post.id}`}
                     onClick={() => handleLike(post.id)}
-                    className={`flex items-center gap-2 hover:text-pink-500 transition-colors touch-feedback ${
-                      likedPosts.has(post.id) ? 'text-pink-500' : 'text-muted-foreground'
-                    }`}
+                    className="flex items-center gap-2 hover:text-orange-500 transition-colors group"
                   >
-                    <Heart className={`w-5 h-5 ${
-                      likedPosts.has(post.id) ? 'fill-current heart-beat' : ''
-                    }`} />
-                    <span className="text-sm font-medium">Beğen</span>
+                    <Heart
+                      className={`w-5 h-5 ${
+                        likedPosts.has(post.id)
+                          ? 'fill-orange-500 text-orange-500'
+                          : 'text-gray-400 group-hover:text-orange-500'
+                      }`}
+                    />
+                    <span className="text-sm text-gray-400 group-hover:text-orange-500">
+                      {post.likes_count}
+                    </span>
                   </button>
 
+                  {/* Comment Button */}
                   <button
-                    onClick={() => {
-                      setSelectedPost(post);
-                      loadComments(post.id);
-                    }}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-purple-500 transition-colors"
+                    onClick={() => loadComments(post.id)}
+                    className="flex items-center gap-2 hover:text-orange-500 transition-colors group"
                   >
-                    <MessageCircle className="w-5 h-5" />
-                    <span className="text-sm font-medium">Yorum</span>
+                    <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-orange-500" />
+                    <span className="text-sm text-gray-400 group-hover:text-orange-500">
+                      {post.comments_count}
+                    </span>
                   </button>
 
-                  <button className="flex items-center gap-2 text-muted-foreground hover:text-blue-500 transition-colors">
-                    <Share2 className="w-5 h-5" />
-                    <span className="text-sm font-medium">Paylaş</span>
+                  {/* Share Button */}
+                  <button className="flex items-center gap-2 hover:text-orange-500 transition-colors group">
+                    <Share2 className="w-5 h-5 text-gray-400 group-hover:text-orange-500" />
+                    <span className="text-sm text-gray-400 group-hover:text-orange-500">
+                      {post.shares_count}
+                    </span>
                   </button>
                 </div>
+
+                {/* Bookmark Button */}
+                <button className="text-gray-400 hover:text-orange-500 transition-colors">
+                  <Bookmark className="w-5 h-5" />
+                </button>
               </div>
+
+              {/* Comments Section */}
+              {selectedPost === post.id && (
+                <div className="border-t border-zinc-800 p-4 bg-black/50">
+                  <div className="space-y-3 mb-3 max-h-64 overflow-y-auto">
+                    {comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-2">
+                        <img
+                          src={comment.user_avatar}
+                          alt={comment.username}
+                          className="w-8 h-8 rounded-full flex-shrink-0"
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm">
+                            <span className="font-semibold text-white">@{comment.username}</span>{' '}
+                            <span className="text-gray-300">{comment.content}</span>
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(comment.created_at).toLocaleString('tr-TR')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Add Comment */}
+                  <form onSubmit={(e) => handleComment(e, post.id)} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Yorum yap..."
+                      className="flex-1 bg-zinc-900 text-white px-4 py-2 rounded-full outline-none focus:ring-2 ring-orange-500"
+                    />
+                    <button
+                      type="submit"
+                      className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center hover:scale-105 transition-transform"
+                      disabled={!newComment.trim()}
+                    >
+                      <Send className="w-5 h-5 text-white" />
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </div>
-
-      {/* Create Post Modal */}
-      {showPostModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-2xl p-6 max-w-lg w-full border border-border">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-foreground">Gönderi Oluştur</h2>
-              <button onClick={() => setShowPostModal(false)} className="text-muted-foreground hover:text-foreground">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleCreatePost}>
-              <textarea
-                value={newPost.content}
-                onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                className="w-full p-4 bg-muted border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none resize-none"
-                rows="4"
-                placeholder="Ne düşünüyorsun?"
-                required
-              />
-
-              <div className="mt-4">
-                <input
-                  type="url"
-                  value={newPost.image_url}
-                  onChange={(e) => setNewPost({ ...newPost, image_url: e.target.value })}
-                  className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
-                  placeholder="Resim URL (isteğe bağlı)"
-                />
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowPostModal(false)}
-                  className="flex-1 py-3 border border-border rounded-xl font-semibold text-foreground hover:bg-muted"
-                >
-                  İptal
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg"
-                >
-                  Paylaş
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Comments Modal */}
-      {selectedPost && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto border border-border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-foreground">Yorumlar</h2>
-              <button
-                onClick={() => setSelectedPost(null)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Comments List */}
-            <div className="space-y-4 mb-4">
-              {comments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">Henüz yorum yok</p>
-              ) : (
-                comments.map((comment) => (
-                  <div key={comment.id} className="flex gap-3">
-                    <img
-                      src={comment.user_avatar}
-                      alt={comment.username}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div className="flex-1 bg-muted rounded-2xl p-3">
-                      <p className="font-semibold text-sm text-foreground">@{comment.username}</p>
-                      <p className="text-foreground">{comment.content}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{formatTimeAgo(comment.created_at)}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Comment Input */}
-            <div className="flex gap-2 pt-4 border-t border-border">
-              <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="flex-1 px-4 py-2 bg-muted border border-border rounded-full text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none"
-                placeholder="Yorum yaz..."
-              />
-              <button
-                onClick={() => handleComment(selectedPost.id)}
-                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:shadow-lg"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   );
 }
