@@ -55,23 +55,43 @@ function AdminPanel() {
 
   const loadAdminData = async () => {
     try {
-      const [statsRes, usersRes, postsRes, earningsRes] = await Promise.all([
+      const [statsRes, usersRes, postsRes] = await Promise.all([
         axios.get(`${API}/admin/stats`),
         axios.get(`${API}/admin/users`),
-        axios.get(`${API}/posts`),
-        axios.get(`${API}/admin/earnings`)
+        axios.get(`${API}/posts`)
       ]);
 
       setStats(statsRes.data);
       setUsers(usersRes.data);
       setPosts(postsRes.data);
-      setEarnings(earningsRes.data);
     } catch (error) {
       console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const loadEarnings = async (page = 1) => {
+    try {
+      const res = await axios.get(`${API}/admin/earnings?page=${page}&limit=50`);
+      if (res.data.earnings) {
+        setEarnings(res.data.earnings);
+        setEarningsTotal(res.data.total);
+        setEarningsPage(page);
+      } else {
+        // Backward compatibility if API doesn't return paginated response
+        setEarnings(res.data);
+      }
+    } catch (error) {
+      console.error('Error loading earnings:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'earnings' && adminUser) {
+      loadEarnings(earningsPage);
+    }
+  }, [activeTab, adminUser]);
 
   const handleBanUser = async (userId, username) => {
     if (!window.confirm(`${username} kullanıcısını banlamak istediğinize emin misiniz?`)) return;
