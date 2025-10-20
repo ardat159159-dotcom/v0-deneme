@@ -300,7 +300,15 @@ function AdminPanel() {
                       .map((user, index) => (
                         <tr key={user.id} className="hover:bg-zinc-800/50">
                           <td className="p-4">
-                            <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${\n                              index === 0 ? 'bg-yellow-500 text-black' :\n                              index === 1 ? 'bg-gray-400 text-black' :\n                              index === 2 ? 'bg-orange-600 text-white' :\n                              'bg-zinc-800 text-gray-400'\n                            }`}>\n                              {index + 1}\n                            </span>\n                          </td>
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                              index === 0 ? 'bg-yellow-500 text-black' :
+                              index === 1 ? 'bg-gray-400 text-black' :
+                              index === 2 ? 'bg-orange-600 text-white' :
+                              'bg-zinc-800 text-gray-400'
+                            }`}>
+                              {index + 1}
+                            </span>
+                          </td>
                           <td className="p-4">
                             <div className="flex items-center gap-3">
                               <img
