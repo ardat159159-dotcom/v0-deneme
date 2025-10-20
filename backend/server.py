@@ -267,8 +267,90 @@ class EarningsConfig(BaseModel):
 
 # ==================== HELPER FUNCTIONS ====================
 
-async def add_earning(user_id: str, amount: float, earning_type: str, source_id: str):
-    """Add earning to user"""
+# Password functions
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against a hash"""
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    """Hash a password"""
+    return pwd_context.hash(password)
+
+# JWT Token functions
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """Create JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire, "type": "access"})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def create_refresh_token(data: dict):
+    """Create JWT refresh token"""
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "type": "refresh"})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get current user from JWT token"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        token_data = TokenData(user_id=user_id, is_admin=payload.get("is_admin", False))
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
+    user = await db.users.find_one({"id": token_data.user_id}, {"_id": 0})
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
+    """Verify user is admin"""
+    if not current_user.get('is_admin', False):
+        raise HTTPException(status_code=403, detail="Not enough permissions. Admin access required.")
+    return current_user
+
+async def get_earnings_config():
+    """Get earnings configuration"""
+    config = await db.earnings_config.find_one({}, {"_id": 0})
+    if not config:
+        # Create default config if not exists
+        default_config = EarningsConfig()
+        doc = default_config.model_dump()
+        doc['updated_at'] = doc['updated_at'].isoformat()
+        await db.earnings_config.insert_one(doc)
+        return default_config
+    return EarningsConfig(**config)
+
+async def add_earning(user_id: str, amount: float, earning_type: str, source_id: str, request: Request):
+    """Add earning to user with IP logging"""
+    # Get IP address
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    
+    # Create earning log
+    earning_log = EarningLog(
+        user_id=user_id,
+        amount=amount,
+        type=earning_type,
+        source_id=source_id,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
+    log_doc = earning_log.model_dump()
+    log_doc['created_at'] = log_doc['created_at'].isoformat()
+    await db.earnings_logs.insert_one(log_doc)
+    
+    # Also add to regular earnings collection (for backward compatibility)
     earning = Earning(
         user_id=user_id,
         amount=amount,
