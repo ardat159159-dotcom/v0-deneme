@@ -118,15 +118,18 @@ user_problem_statement: |
 backend:
   - task: "JWT Token System"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented JWT access token (15min) and refresh token (7 days) system with PyJWT. Added password hashing with bcrypt. Login and register endpoints now return JWT tokens. Middleware functions created (get_current_user, get_current_admin_user) but not yet integrated to all routes."
+      - working: true
+        agent: "testing"
+        comment: "✅ JWT token system working correctly. User registration returns access_token, refresh_token, and user object. Password hashing with bcrypt is working properly. New users can register and login successfully with JWT tokens. Admin login has issues due to existing admin user having unhashed password in database, but new registrations work correctly."
 
   - task: "Rate Limiting"
     implemented: true
