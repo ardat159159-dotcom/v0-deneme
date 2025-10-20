@@ -163,15 +163,18 @@ backend:
 
   - task: "Earnings Configuration System"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created EarningsConfig model with configurable rates (like_rate, comment_rate, share_rate, view_rate, min_withdrawal_amount). Added get_earnings_config() helper function. Created admin endpoints: GET /admin/earnings-config and PUT /admin/earnings-config to manage rates."
+      - working: false
+        agent: "testing"
+        comment: "❌ Earnings config endpoint not properly protected. GET /admin/earnings-config returns 200 OK even without admin_email parameter, should return 403. The endpoint returns config data (like_rate, comment_rate, min_withdrawal_amount) but lacks proper admin authentication check."
 
   - task: "Withdrawal Verification System"
     implemented: true
