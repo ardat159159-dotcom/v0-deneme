@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Sparkles, Mail, Lock, User } from 'lucide-react';
+import { User, Mail, Lock, Sparkles } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -16,13 +16,6 @@ function Register({ onLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,99 +36,96 @@ function Register({ onLogin }) {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
+        {/* Logo & Branding */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 mb-4">
-            <Sparkles className="w-10 h-10 text-purple-600" />
-            <h1 className="text-3xl font-bold gradient-text">lupintr</h1>
-          </Link>
-          <p className="text-gray-600">Hemen hesap oluşturun</p>
+          <div className="inline-flex items-center justify-center w-20 h-20 gradient-primary rounded-3xl mb-4">
+            <Sparkles className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-2">lupintr</h1>
+          <p className="text-gray-400">Topluğa Katıl!</p>
         </div>
 
-        {/* Form */}
-        <div className="bg-white rounded-3xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Register Form */}
+        <div className="glass-card p-8">
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Hesap Oluştur</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+              <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 text-red-500 text-sm">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kullanıcı Adı
-              </label>
+              <label className="block text-sm text-gray-400 mb-2">Kullanıcı Adı</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="text"
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                  placeholder="kullanici_adi"
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-900 text-white rounded-xl outline-none focus:ring-2 ring-orange-500"
+                  placeholder="kullaniciadi"
                   required
-                  data-testid="register-username-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ad Soyad
-              </label>
+              <label className="block text-sm text-gray-400 mb-2">Ad Soyad</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="text"
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                  placeholder="Adınız Soyadınız"
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-900 text-white rounded-xl outline-none focus:ring-2 ring-orange-500"
+                  placeholder="Ad Soyad"
                   required
-                  data-testid="register-fullname-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                E-posta
-              </label>
+              <label className="block text-sm text-gray-400 mb-2">E-posta</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
-                  placeholder="ornek@email.com"
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-900 text-white rounded-xl outline-none focus:ring-2 ring-orange-500"
+                  placeholder="email@example.com"
                   required
-                  data-testid="register-email-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Şifre
-              </label>
+              <label className="block text-sm text-gray-400 mb-2">Şifre</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                  className="w-full pl-12 pr-4 py-3 bg-zinc-900 text-white rounded-xl outline-none focus:ring-2 ring-orange-500"
                   placeholder="••••••••"
                   required
-                  data-testid="register-password-input"
                 />
               </div>
             </div>
@@ -143,22 +133,26 @@ function Register({ onLogin }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50"
-              data-testid="register-submit-btn"
+              className="w-full btn-primary py-4 text-lg font-semibold disabled:opacity-50"
             >
-              {loading ? 'Hesap oluşturuluyor...' : 'Kayıt Ol'}
+              {loading ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Zaten hesabınız var mı?{' '}
-              <Link to="/login" className="text-purple-600 font-semibold hover:text-purple-700">
+            <p className="text-gray-400">
+              Zaten hesabın var mı?{' '}
+              <Link to="/login" className="text-orange-500 hover:text-orange-400 font-semibold">
                 Giriş Yap
               </Link>
             </p>
           </div>
         </div>
+
+        {/* Terms */}
+        <p className="mt-6 text-center text-xs text-gray-500">
+          Kayıt olarak <Link to="/terms" className="text-orange-500 hover:text-orange-400">Kullanım Koşulları</Link>'nı kabul etmiş olursunuz.
+        </p>
       </div>
     </div>
   );
