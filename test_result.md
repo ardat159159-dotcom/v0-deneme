@@ -193,15 +193,18 @@ backend:
 
   - task: "Admin Route Protection"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added admin_email query parameter check to all admin routes (temporary solution until frontend JWT integration). Only admin@lupintr.com can access. Added active_users_today stat to /admin/stats endpoint."
+      - working: false
+        agent: "testing"
+        comment: "❌ Admin route protection partially working but inconsistent. GET /admin/stats works correctly (returns 403 without admin_email, 200 with correct email, 403 with wrong email). However, GET /admin/users and GET /admin/earnings-config return 200 OK even without admin_email parameter. Admin routes are not consistently protected - some check admin_email parameter properly while others don't."
 
   - task: "Earnings Pagination"
     implemented: true
