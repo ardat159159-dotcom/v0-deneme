@@ -1,0 +1,96 @@
+[
+  {
+    "test": "User Registration with JWT",
+    "success": true,
+    "message": "Registration successful with JWT tokens",
+    "timestamp": "2025-10-20T00:11:50.071500",
+    "details": {
+      "user_id": "f3d4f942-0f83-4d2d-a406-c3a762ecb847",
+      "has_access_token": true,
+      "has_refresh_token": true
+    }
+  },
+  {
+    "test": "Admin Login with JWT",
+    "success": false,
+    "message": "Admin login failed: 500",
+    "timestamp": "2025-10-20T00:11:50.581707",
+    "details": {
+      "response": "Internal Server Error"
+    }
+  },
+  {
+    "test": "Rate Limiting - Registration",
+    "success": false,
+    "message": "Rate limiting not triggered after 6 requests",
+    "timestamp": "2025-10-20T00:11:53.085752",
+    "details": {}
+  },
+  {
+    "test": "Rate Limiting - Login",
+    "success": false,
+    "message": "Login rate limiting not triggered after 11 requests",
+    "timestamp": "2025-10-20T00:11:54.770564",
+    "details": {}
+  },
+  {
+    "test": "Earnings Logging with IP",
+    "success": true,
+    "message": "Earnings logged successfully after like action",
+    "timestamp": "2025-10-20T00:11:56.365109",
+    "details": {
+      "total_earnings": 0.01,
+      "earnings_count": 1
+    }
+  },
+  {
+    "test": "Comment Earnings Logging",
+    "success": true,
+    "message": "Comment earnings logged successfully",
+    "timestamp": "2025-10-20T00:11:57.886054",
+    "details": {
+      "total_earnings": 0.03,
+      "earnings_count": 2
+    }
+  },
+  {
+    "test": "Admin Stats Access Protection",
+    "success": false,
+    "message": "Admin stats not properly protected, got 200 instead of 403",
+    "timestamp": "2025-10-20T00:11:58.450108",
+    "details": {}
+  },
+  {
+    "test": "Admin Users List Access",
+    "success": false,
+    "message": "Admin users not properly protected, got 200",
+    "timestamp": "2025-10-20T00:11:58.964170",
+    "details": {}
+  },
+  {
+    "test": "Earnings Pagination",
+    "success": true,
+    "message": "Earnings pagination working correctly",
+    "timestamp": "2025-10-20T00:11:59.473123",
+    "details": {
+      "total_earnings": 22,
+      "current_page": 1,
+      "total_pages": 1,
+      "earnings_on_page": 22
+    }
+  },
+  {
+    "test": "Earnings Configuration",
+    "success": false,
+    "message": "Earnings config not properly protected, got 200",
+    "timestamp": "2025-10-20T00:12:00.027406",
+    "details": {}
+  },
+  {
+    "test": "Withdrawal Verification Flow",
+    "success": false,
+    "message": "Withdrawal request failed: 400",
+    "timestamp": "2025-10-20T00:12:00.543256",
+    "details": {}
+  }
+]
