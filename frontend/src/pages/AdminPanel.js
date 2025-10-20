@@ -295,7 +295,7 @@ function AdminPanel() {
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-300">{user.email}</td>
+                      <td className="p-4 text-gray-300 font-mono text-sm">{maskEmail(user.email)}</td>
                       <td className="p-4 text-gray-300">{user.followers_count}</td>
                       <td className="p-4 text-green-500 font-medium">${user.total_earnings.toFixed(2)}</td>
                       <td className="p-4">
