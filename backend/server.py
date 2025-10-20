@@ -227,6 +227,44 @@ class Notification(BaseModel):
     is_read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
+# Token Models
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+class TokenData(BaseModel):
+    user_id: Optional[str] = None
+    is_admin: bool = False
+
+# Earnings Log Model
+class EarningLog(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    amount: float
+    type: str  # "like", "comment", "share", "view"
+    source_id: str  # post_id, story_id, etc.
+    ip_address: str
+    user_agent: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Withdrawal Models Update
+class WithdrawalVerification(BaseModel):
+    verification_code: str
+
+# Earnings Config Model (for rate configuration)
+class EarningsConfig(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    like_rate: float = 0.01
+    comment_rate: float = 0.02
+    share_rate: float = 0.05
+    view_rate: float = 0.001
+    min_withdrawal_amount: float = 10.0
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ==================== HELPER FUNCTIONS ====================
 
 async def add_earning(user_id: str, amount: float, earning_type: str, source_id: str):
