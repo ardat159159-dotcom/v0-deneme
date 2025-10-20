@@ -34,8 +34,18 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Rate Limiter
-limiter = Limiter(key_func=get_remote_address)
+# Rate Limiter - Custom key function for Kubernetes/Load Balancer
+def get_real_ip(request: Request) -> str:
+    """Get real IP from behind load balancer"""
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+    return request.client.host if request.client else "unknown"
+
+limiter = Limiter(key_func=get_real_ip)
 
 # Security
 security = HTTPBearer()
