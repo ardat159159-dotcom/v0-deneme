@@ -437,8 +437,29 @@ async def login(credentials: UserLogin, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Verify password
-    if not verify_password(credentials.password, user['password']):
+    # Backward compatibility: Check if password is hashed or plain text
+    password_valid = False
+    
+    # Try hashed password verification first
+    try:
+        if user['password'].startswith('$2b$') or user['password'].startswith('$2a$'):
+            password_valid = verify_password(credentials.password, user['password'])
+        else:
+            # Plain text password (old users)
+            password_valid = (credentials.password == user['password'])
+            
+            # Hash the password for future logins
+            if password_valid:
+                hashed_password = get_password_hash(credentials.password)
+                await db.users.update_one(
+                    {"id": user['id']},
+                    {"$set": {"password": hashed_password}}
+                )
+    except Exception as e:
+        # Fallback to plain text comparison
+        password_valid = (credentials.password == user['password'])
+    
+    if not password_valid:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Set admin flag if not exists
