@@ -6,6 +6,23 @@ import { Users, FileText, DollarSign, Shield, Ban, Trash2, Search, LogOut, Alert
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Email masking function
+const maskEmail = (email) => {
+  if (!email) return '';
+  const [username, domain] = email.split('@');
+  if (!domain) return email;
+  
+  const maskedUsername = username.length > 2 
+    ? username.substring(0, 2) + '***'
+    : username;
+  const [domainName, extension] = domain.split('.');
+  const maskedDomain = domainName.length > 2
+    ? domainName.substring(0, 2) + '***'
+    : domainName;
+  
+  return `${maskedUsername}@${maskedDomain}.${extension}`;
+};
+
 function AdminPanel() {
   const navigate = useNavigate();
   const [adminUser, setAdminUser] = useState(null);
