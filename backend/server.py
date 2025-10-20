@@ -791,9 +791,10 @@ async def update_kyc(user_id: str, kyc: KYCUpdate):
 
 # ==================== WITHDRAWAL ROUTES ====================
 
-@api_router.post("/withdrawals")
-async def create_withdrawal(withdrawal: WithdrawalRequest):
-    """Create withdrawal request"""
+@api_router.post("/withdrawals/request")
+@limiter.limit("5/hour")
+async def request_withdrawal(withdrawal: WithdrawalRequest, request: Request):
+    """Request withdrawal with email verification code"""
     # Get user
     user = await db.users.find_one({"id": withdrawal.user_id}, {"_id": 0})
     if not user:
@@ -803,33 +804,101 @@ async def create_withdrawal(withdrawal: WithdrawalRequest):
     if not user.get('kyc_verified', False):
         raise HTTPException(status_code=400, detail="Para çekebilmek için kimlik doğrulaması yapmalısınız")
     
+    # Get earnings config for minimum amount
+    config = await get_earnings_config()
+    
     # Check minimum amount
-    if withdrawal.amount < 10:
-        raise HTTPException(status_code=400, detail="Minimum çekim tutarı $10.00")
+    if withdrawal.amount < config.min_withdrawal_amount:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Minimum çekim tutarı ${config.min_withdrawal_amount:.2f}"
+        )
     
     # Check balance
     if user.get('total_earnings', 0) < withdrawal.amount:
         raise HTTPException(status_code=400, detail="Yetersiz bakiye")
     
+    # Generate verification code (6 digits)
+    verification_code = str(random.randint(100000, 999999))
+    
+    # Store verification request (expires in 10 minutes)
+    verification_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": withdrawal.user_id,
+        "amount": withdrawal.amount,
+        "method": withdrawal.method,
+        "wallet_address": withdrawal.wallet_address,
+        "verification_code": verification_code,
+        "ip_address": request.client.host if request.client else "unknown",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat(),
+        "verified": False
+    }
+    await db.withdrawal_verifications.insert_one(verification_doc)
+    
+    # In production, send email with verification code
+    # For now, return code in response (remove in production)
+    return {
+        "message": "Doğrulama kodu e-postanıza gönderildi",
+        "verification_code": verification_code,  # Remove this in production
+        "expires_in_minutes": 10
+    }
+
+@api_router.post("/withdrawals/verify")
+async def verify_withdrawal(
+    user_id: str,
+    verification_code: str,
+    request: Request
+):
+    """Verify withdrawal with code and process"""
+    # Find pending verification
+    verification = await db.withdrawal_verifications.find_one({
+        "user_id": user_id,
+        "verification_code": verification_code,
+        "verified": False
+    }, {"_id": 0})
+    
+    if not verification:
+        raise HTTPException(status_code=400, detail="Geçersiz doğrulama kodu")
+    
+    # Check expiration
+    expires_at = datetime.fromisoformat(verification['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Doğrulama kodu süresi doldu")
+    
+    # Get user
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+    
     # Create withdrawal
     new_withdrawal = Withdrawal(
-        user_id=withdrawal.user_id,
-        amount=withdrawal.amount,
-        method=withdrawal.method,
-        wallet_address=withdrawal.wallet_address
+        user_id=user_id,
+        amount=verification['amount'],
+        method=verification['method'],
+        wallet_address=verification.get('wallet_address')
     )
     
     doc = new_withdrawal.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.withdrawals.insert_one(doc)
     
-    # Deduct from user balance (in real app, only after approval)
+    # Deduct from user balance
     await db.users.update_one(
-        {"id": withdrawal.user_id},
-        {"$set": {"total_earnings": user.get('total_earnings', 0) - withdrawal.amount}}
+        {"id": user_id},
+        {"$set": {"total_earnings": user.get('total_earnings', 0) - verification['amount']}}
     )
     
-    return {"message": "Para çekme talebiniz alındı", "withdrawal": new_withdrawal}
+    # Mark verification as used
+    await db.withdrawal_verifications.update_one(
+        {"id": verification['id']},
+        {"$set": {"verified": True, "verified_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {
+        "message": "Para çekme talebiniz onaylandı",
+        "withdrawal": new_withdrawal
+    }
 
 @api_router.get("/withdrawals/{user_id}")
 async def get_withdrawals(user_id: str):
