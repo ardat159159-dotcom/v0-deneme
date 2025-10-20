@@ -362,7 +362,8 @@ function AdminPanel() {
                         <span className="text-green-500 font-semibold">+${earning.amount.toFixed(3)}</span>
                       </div>
                     );
-                  })}\n                </div>
+                  })}
+                </div>
               </div>
             </div>
           </div>
