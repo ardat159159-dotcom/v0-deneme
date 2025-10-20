@@ -274,6 +274,7 @@ function AdminPanel() {
               <table className="w-full">
                 <thead className="bg-zinc-800">
                   <tr>
+                    <th className="text-left p-4 text-sm font-medium text-gray-400">ID</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Kullanıcı</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">E-posta</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Takipçi</th>
