@@ -1169,6 +1169,12 @@ async def update_earnings_config(
         update_data['view_rate'] = view_rate
     if min_withdrawal_amount is not None:
         update_data['min_withdrawal_amount'] = min_withdrawal_amount
+    if btc_wallet is not None:
+        update_data['btc_wallet'] = btc_wallet
+    if eth_wallet is not None:
+        update_data['eth_wallet'] = eth_wallet
+    if usdt_wallet is not None:
+        update_data['usdt_wallet'] = usdt_wallet
     
     update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
     
