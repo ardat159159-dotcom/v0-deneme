@@ -1185,6 +1185,69 @@ async def update_earnings_config(
     
     return {"message": "Earnings config updated successfully"}
 
+@api_router.get("/admin/withdrawals")
+async def get_pending_withdrawals(
+    status: str = "pending",
+    admin_email: str = "admin@lupintr.com"
+):
+    """Get withdrawal requests (admin only)"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    withdrawals = await db.withdrawals.find({"status": status}, {"_id": 0}).to_list(1000)
+    
+    # Get user info for each withdrawal
+    for withdrawal in withdrawals:
+        user = await db.users.find_one({"id": withdrawal['user_id']}, {"_id": 0, "username": 1, "email": 1})
+        if user:
+            withdrawal['username'] = user.get('username')
+            withdrawal['email'] = user.get('email')
+    
+    return withdrawals
+
+@api_router.put("/admin/withdrawals/{withdrawal_id}")
+async def update_withdrawal_status(
+    withdrawal_id: str,
+    update: WithdrawalUpdate,
+    admin_email: str = "admin@lupintr.com"
+):
+    """Approve or reject withdrawal (admin only)"""
+    if admin_email != "admin@lupintr.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    withdrawal = await db.withdrawals.find_one({"id": withdrawal_id}, {"_id": 0})
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Withdrawal not found")
+    
+    if withdrawal['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Withdrawal already processed")
+    
+    # Update withdrawal status
+    update_data = {
+        "status": update.status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if update.admin_note:
+        update_data['admin_note'] = update.admin_note
+    
+    await db.withdrawals.update_one(
+        {"id": withdrawal_id},
+        {"$set": update_data}
+    )
+    
+    # If rejected, return money to user
+    if update.status == "rejected":
+        user = await db.users.find_one({"id": withdrawal['user_id']}, {"_id": 0})
+        if user:
+            new_balance = user.get('total_earnings', 0) + withdrawal['amount']
+            await db.users.update_one(
+                {"id": withdrawal['user_id']},
+                {"$set": {"total_earnings": new_balance}}
+            )
+    
+    return {"message": f"Withdrawal {update.status} successfully"}
+
 # ==================== SEED DATA ROUTE ====================
 
 @api_router.post("/seed-data")
