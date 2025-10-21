@@ -1148,6 +1148,9 @@ async def update_earnings_config(
     share_rate: Optional[float] = None,
     view_rate: Optional[float] = None,
     min_withdrawal_amount: Optional[float] = None,
+    btc_wallet: Optional[str] = None,
+    eth_wallet: Optional[str] = None,
+    usdt_wallet: Optional[str] = None,
     admin_email: str = "admin@lupintr.com"
 ):
     """Update earnings configuration (admin only)"""
