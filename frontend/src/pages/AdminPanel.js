@@ -206,6 +206,8 @@ function AdminPanel() {
               { id: 'users', label: 'Kullanıcılar', icon: Users },
               { id: 'posts', label: 'Gönderiler', icon: FileText },
               { id: 'earnings', label: 'Kazançlar', icon: DollarSign },
+              { id: 'withdrawals', label: 'Para Çekme', icon: DollarSign },
+              { id: 'settings', label: 'Ödeme Ayarları', icon: Shield },
             ].map((tab) => {
               const Icon = tab.icon;
               return (
