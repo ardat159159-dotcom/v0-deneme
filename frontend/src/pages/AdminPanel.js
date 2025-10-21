@@ -35,6 +35,13 @@ function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState('');
   const [earningsPage, setEarningsPage] = useState(1);
   const [earningsTotal, setEarningsTotal] = useState(0);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [walletSettings, setWalletSettings] = useState({
+    btc_wallet: '',
+    eth_wallet: '',
+    usdt_wallet: '',
+    min_withdrawal_amount: 10
+  });
 
   useEffect(() => {
     const admin = localStorage.getItem('adminUser');
