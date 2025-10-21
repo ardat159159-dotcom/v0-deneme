@@ -273,7 +273,15 @@ class EarningsConfig(BaseModel):
     share_rate: float = 0.05
     view_rate: float = 0.001
     min_withdrawal_amount: float = 10.0
+    btc_wallet: str = ""
+    eth_wallet: str = ""
+    usdt_wallet: str = ""
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Withdrawal Update Model
+class WithdrawalUpdate(BaseModel):
+    status: str  # "approved" or "rejected"
+    admin_note: Optional[str] = None
 
 # ==================== HELPER FUNCTIONS ====================
 
