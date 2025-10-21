@@ -640,6 +640,178 @@ function AdminPanel() {
             )}
           </div>
         )}
+
+
+        {/* Withdrawals Tab */}
+        {activeTab === 'withdrawals' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Para Çekme Talepleri</h2>
+              <span className="px-4 py-2 bg-orange-500/20 text-orange-500 rounded-lg font-semibold">
+                {withdrawals.length} Bekleyen
+              </span>
+            </div>
+
+            {withdrawals.length === 0 ? (
+              <div className="bg-zinc-900 rounded-2xl p-12 text-center border border-zinc-800">
+                <DollarSign className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400">Bekleyen para çekme talebi yok</p>
+              </div>
+            ) : (
+              <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-zinc-800">
+                    <tr>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Kullanıcı</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">E-posta</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Tutar</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Yöntem</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Cüzdan</th>
+                      <th className="text-left p-4 text-sm font-medium text-gray-400">Tarih</th>
+                      <th className="text-right p-4 text-sm font-medium text-gray-400">İşlem</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800">
+                    {withdrawals.map((withdrawal) => (
+                      <tr key={withdrawal.id} className="hover:bg-zinc-800/50">
+                        <td className="p-4 font-medium">@{withdrawal.username}</td>
+                        <td className="p-4 text-gray-400 text-sm">{withdrawal.email}</td>
+                        <td className="p-4">
+                          <span className="text-green-500 font-bold text-lg">
+                            ${withdrawal.amount.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="px-3 py-1 bg-blue-500/20 text-blue-500 rounded-full text-xs font-semibold uppercase">
+                            {withdrawal.method}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <code className="text-xs text-gray-500 bg-zinc-800 px-2 py-1 rounded">
+                            {withdrawal.wallet_address?.substring(0, 20)}...
+                          </code>
+                        </td>
+                        <td className="p-4 text-sm text-gray-400">
+                          {new Date(withdrawal.created_at).toLocaleString('tr-TR')}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={() => handleApproveWithdrawal(withdrawal.id)}
+                              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-semibold"
+                            >
+                              Onayla
+                            </button>
+                            <button
+                              onClick={() => handleRejectWithdrawal(withdrawal.id)}
+                              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-semibold"
+                            >
+                              Reddet
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Settings Tab - Wallet Settings */}
+        {activeTab === 'settings' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Ödeme Ayarları</h2>
+            
+            <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-8">
+              <form onSubmit={handleSaveWalletSettings} className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-orange-500" />
+                    Kripto Cüzdan Adresleri
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-6">
+                    Kullanıcılar para çekerken bu cüzdan adreslerine transfer yapılacak
+                  </p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Bitcoin (BTC) Cüzdan Adresi
+                      </label>
+                      <input
+                        type="text"
+                        value={walletSettings.btc_wallet}
+                        onChange={(e) => setWalletSettings({ ...walletSettings, btc_wallet: e.target.value })}
+                        placeholder="bc1q..."
+                        className="w-full bg-zinc-800 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Ethereum (ETH) Cüzdan Adresi
+                      </label>
+                      <input
+                        type="text"
+                        value={walletSettings.eth_wallet}
+                        onChange={(e) => setWalletSettings({ ...walletSettings, eth_wallet: e.target.value })}
+                        placeholder="0x..."
+                        className="w-full bg-zinc-800 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        USDT (Tether) Cüzdan Adresi
+                      </label>
+                      <input
+                        type="text"
+                        value={walletSettings.usdt_wallet}
+                        onChange={(e) => setWalletSettings({ ...walletSettings, usdt_wallet: e.target.value })}
+                        placeholder="0x..."
+                        className="w-full bg-zinc-800 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Minimum Çekim Tutarı ($)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={walletSettings.min_withdrawal_amount}
+                        onChange={(e) => setWalletSettings({ ...walletSettings, min_withdrawal_amount: parseFloat(e.target.value) })}
+                        className="w-full bg-zinc-800 text-white px-4 py-3 rounded-xl outline-none focus:ring-2 ring-orange-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-800">
+                  <button
+                    type="submit"
+                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-semibold hover:scale-105 transition-transform"
+                  >
+                    Ayarları Kaydet
+                  </button>
+                </div>
+              </form>
+
+              <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                <h4 className="text-sm font-semibold text-blue-400 mb-2">ℹ️ Bilgi</h4>
+                <ul className="text-sm text-gray-400 space-y-1">
+                  <li>• Kullanıcılar para çekme talebinde bulunduğunda buradaki cüzdan adresleri gösterilir</li>
+                  <li>• Manuel olarak bu adreslere transfer yapmanız gerekmektedir</li>
+                  <li>• Transfer yaptıktan sonra "Para Çekme Talepleri" sekmesinden onaylayın</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
