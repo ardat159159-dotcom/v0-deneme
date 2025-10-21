@@ -98,7 +98,81 @@ function AdminPanel() {
     if (activeTab === 'earnings' && adminUser) {
       loadEarnings(earningsPage);
     }
+    if (activeTab === 'withdrawals' && adminUser) {
+      loadWithdrawals();
+    }
+    if (activeTab === 'settings' && adminUser) {
+      loadWalletSettings();
+    }
   }, [activeTab, adminUser]);
+
+  const loadWithdrawals = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/withdrawals?status=pending`);
+      setWithdrawals(res.data);
+    } catch (error) {
+      console.error('Error loading withdrawals:', error);
+    }
+  };
+
+  const loadWalletSettings = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/earnings-config`);
+      setWalletSettings({
+        btc_wallet: res.data.btc_wallet || '',
+        eth_wallet: res.data.eth_wallet || '',
+        usdt_wallet: res.data.usdt_wallet || '',
+        min_withdrawal_amount: res.data.min_withdrawal_amount || 10
+      });
+    } catch (error) {
+      console.error('Error loading wallet settings:', error);
+    }
+  };
+
+  const handleApproveWithdrawal = async (withdrawalId) => {
+    if (!window.confirm('Bu para çekme talebini onaylıyor musunuz?')) return;
+    
+    try {
+      await axios.put(`${API}/admin/withdrawals/${withdrawalId}`, {
+        status: 'approved',
+        admin_note: 'Onaylandı'
+      });
+      showToast('Para çekme talebi onaylandı!');
+      loadWithdrawals();
+    } catch (error) {
+      console.error('Error approving withdrawal:', error);
+      showToast('Hata oluştu!', true);
+    }
+  };
+
+  const handleRejectWithdrawal = async (withdrawalId) => {
+    const reason = prompt('Reddetme sebebi:');
+    if (!reason) return;
+    
+    try {
+      await axios.put(`${API}/admin/withdrawals/${withdrawalId}`, {
+        status: 'rejected',
+        admin_note: reason
+      });
+      showToast('Para çekme talebi reddedildi!');
+      loadWithdrawals();
+    } catch (error) {
+      console.error('Error rejecting withdrawal:', error);
+      showToast('Hata oluştu!', true);
+    }
+  };
+
+  const handleSaveWalletSettings = async (e) => {
+    e.preventDefault();
+    
+    try {
+      await axios.put(`${API}/admin/earnings-config`, walletSettings);
+      showToast('Cüzdan ayarları kaydedildi!');
+    } catch (error) {
+      console.error('Error saving wallet settings:', error);
+      showToast('Hata oluştu!', true);
+    }
+  };
 
   const handleBanUser = async (userId, username) => {
     if (!window.confirm(`${username} kullanıcısını banlamak istediğinize emin misiniz?`)) return;
